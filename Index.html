@@ -1,0 +1,1804 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The GOATs | Panteão Supremo</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #050505;
+            color: #ffffff;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        header { padding: 40px 0 20px 0; text-align: center; }
+        h1 { font-size: 3rem; text-transform: uppercase; letter-spacing: 5px; color: #f1c40f; margin-bottom: 10px; text-shadow: 0 0 15px rgba(241, 196, 15, 0.4); }
+        .subtitle { color: #888; font-style: italic; margin-bottom: 5px; }
+
+        /* --- Tela de Bloqueio Inicial (Gatekeeper) --- */
+        #site-gatekeeper {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000000;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: monospace;
+        }
+        .gatekeeper-box {
+            background: #0a0a0a;
+            border: 2px solid #f1c40f;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(241, 196, 15, 0.2);
+            max-width: 450px;
+            width: 90%;
+        }
+        .gatekeeper-box h2 { color: #f1c40f; letter-spacing: 2px; margin-bottom: 25px; font-size: 1.5rem; text-transform: uppercase;}
+        .gatekeeper-box label { display: block; color: #aaa; margin-bottom: 12px; font-size: 1rem; }
+        .gatekeeper-input {
+            background: #000;
+            border: 1px solid #333;
+            color: #00ffaa;
+            padding: 12px;
+            width: 80%;
+            text-align: center;
+            font-size: 1.1rem;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-family: inherit;
+        }
+        .gatekeeper-input:focus { border-color: #00ffaa; outline: none; }
+        .gatekeeper-btn {
+            background: #f1c40f;
+            color: #000;
+            border: none;
+            padding: 12px 30px;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .gatekeeper-btn:hover { background: #fff; box-shadow: 0 0 15px #f1c40f; }
+        .gatekeeper-error { color: #ff3333; font-size: 0.85rem; margin-top: 15px; display: none; text-transform: uppercase; font-weight: bold;}
+
+        /* --- Banner de Frases Dinâmicas --- */
+        .ticker-container {
+            background: rgba(17, 17, 17, 0.8);
+            border: 1px solid #333;
+            border-radius: 20px;
+            padding: 10px 25px;
+            margin: 15px 0 25px 0;
+            min-width: 320px;
+            max-width: 600px;
+            text-align: center;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+        .ticker-text {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #ff9800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: opacity 0.5s ease-in-out;
+            opacity: 1;
+            display: inline-block;
+            text-shadow: 0 0 8px rgba(255, 152, 0, 0.3);
+        }
+
+        /* --- Topo da Pirâmide --- */
+        .top-pyramid-section {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 30px;
+            margin-bottom: 30px;
+            padding: 0 20px;
+            flex-wrap: wrap;
+        }
+
+        /* --- Sistema de Abas --- */
+        .tabs-menu {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            background: #111;
+            padding: 10px;
+            border-radius: 30px;
+            border: 1px solid #222;
+        }
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: #888;
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+        .tab-btn.active {
+            background: #f1c40f;
+            color: #000;
+            box-shadow: 0 0 15px rgba(241, 196, 15, 0.4);
+        }
+        
+        #btn-aba-especial, #btn-aba-admin {
+            display: none;
+            animation: revealTab 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        #btn-aba-especial { border: 1px dashed #f1c40f; }
+        
+        /* Modificadores Dinâmicos do Painel de Admin Oculto */
+        #btn-aba-admin { border: 1px solid #ff3333; color: #ff3333; }
+        #btn-aba-admin.active { background: #ff3333; color: #000; box-shadow: 0 0 15px rgba(255, 51, 51, 0.4); }
+
+        @keyframes revealTab {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .tab-content {
+            width: 100%;
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 25px;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: #111;
+            border: 2px solid #333;
+            border-radius: 15px;
+            padding: 25px;
+            width: 280px;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .card:hover { 
+            transform: translateY(-12px) scale(1.02); 
+            border-color: #f1c40f; 
+            box-shadow: 0 15px 30px rgba(241, 196, 15, 0.2); 
+        }
+        .card h2 { margin-top: 0; font-size: 1.5rem; animation: nameGlow 3s infinite ease-in-out; color: #f1c40f; }
+
+        @keyframes nameGlow {
+            0%, 100% { text-shadow: 0 0 5px rgba(241, 196, 15, 0.2); transform: scale(1); }
+            50% { text-shadow: 0 0 15px rgba(241, 196, 15, 0.6); transform: scale(1.03); }
+        }
+
+        /* --- Efeitos de Matriz Injetados --- */
+        .glitch-effect { animation: matrixGlitch 0.2s infinite alternate !important; }
+        @keyframes matrixGlitch {
+            0% { transform: translate(2px, 1px) rotate(0deg); filter: hue-rotate(90deg); }
+            100% { transform: translate(-1px, -2px) rotate(1deg); filter: hue-rotate(180deg); }
+        }
+
+        .matrix-chaos-effect { animation: chaosGlitch 0.1s infinite !important; }
+        @keyframes chaosGlitch {
+            0% { filter: invert(1) hue-rotate(0deg); opacity: 0.9; }
+            50% { filter: invert(0) hue-rotate(180deg); opacity: 0.4; }
+            100% { filter: invert(1) hue-rotate(360deg); opacity: 0.9; }
+        }
+
+        /* --- Classes Estilizadas dos Cards --- */
+        .card.jesus { display: none; border-color: #f1c40f; background: radial-gradient(circle at center, #3a2f00, #050505); box-shadow: 0 0 25px rgba(241, 196, 15, 0.5); }
+        .card.jesus:hover { box-shadow: 0 0 45px #f1c40f, inset 0 0 15px rgba(241, 196, 15, 0.4); }
+        .card.jesus h2 { color: #ffffff; text-shadow: 0 0 15px #f1c40f; font-size: 1.6rem; }
+
+        .card.adriell-topo { border-color: #f1c40f; background: radial-gradient(circle at center, #2c2200, #050505); box-shadow: 0 0 35px rgba(241, 196, 15, 0.6); width: 300px; display: none; }
+        .card.adriell-topo h2 { font-size: 1.8rem; color: #fff; text-shadow: 0 0 10px #f1c40f; }
+
+        .card.amostradinho-topo { border-color: #ff4d4d; background: radial-gradient(circle at center, #3a0000, #050505); box-shadow: 0 0 35px rgba(255, 77, 77, 0.6); width: 300px; display: none; }
+        .card.amostradinho-topo h2 { font-size: 1.8rem; color: #fff; text-shadow: 0 0 10px #ff4d4d; }
+        
+        .card.lula { border-color: #cc0000; background: radial-gradient(circle at center, #250000, #050505); box-shadow: 0 0 15px rgba(255, 0, 0, 0.15); }
+        .card.lula:hover { box-shadow: 0 0 30px #ff0000; }
+        .card.lula h2 { color: #ff4444; }
+        
+        .card.seduc { border-color: #7b1fa2; background: linear-gradient(145deg, #2a085c, #0a0a0a); }
+        .card.seduc:hover { box-shadow: 0 0 25px rgba(156, 39, 176, 0.3); }
+        
+        .card.sonia { border-color: #c2185b; background: linear-gradient(145deg, #1c030b, #111); }
+        .card.sonia:hover { box-shadow: 0 0 25px rgba(233, 30, 99, 0.3); }
+        
+        .card.god { border-color: #00b0ff; background: radial-gradient(circle at top, #001f26, #0a0a0a); }
+        .card.god:hover { box-shadow: 0 0 25px rgba(0, 212, 255, 0.3); }
+        
+        .card.final-boss { border: 3px solid #d4af37; background: #1f1800; }
+        .card.final-boss:hover { box-shadow: 0 0 25px rgba(241, 196, 15, 0.4); }
+        
+        .card.marcelo { border-color: #512da8; background: linear-gradient(145deg, #110524, #050505); }
+        .card.marcelo:hover { box-shadow: 0 0 25px rgba(103, 58, 183, 0.3); }
+        
+        .card.adio { border-color: #0288d1; background: linear-gradient(145deg, #003c6c, #050505); }
+        .card.adio:hover { box-shadow: 0 0 25px rgba(3, 169, 244, 0.4); }
+
+        .card.lorrane { border-color: #e64a19; background: linear-gradient(145deg, #8c2607, #050505); }
+        .card.lorrane:hover { box-shadow: 0 0 30px #ff5722; }
+        
+        .card.trump { border-color: #303f9f; background: radial-gradient(circle at center, #101652, #050505); box-shadow: 0 0 15px rgba(63, 81, 181, 0.15); }
+        .card.trump:hover { box-shadow: 0 0 25px #3f51b5; }
+        .card.trump h2 { color: #4d5bb3; }
+        
+        .card.jojo { border-color: #c2185b; background: linear-gradient(145deg, #5c0734, #050505); }
+        .card.jojo:hover { box-shadow: 0 0 25px #e91e63; }
+        
+        .card.tigrinho { border-color: #388e3c; background: radial-gradient(circle at top, #0f4214, #050505); display: none; }
+        .card.tigrinho:hover { box-shadow: 0 0 30px #4caf50; }
+
+        .card.jazzghost { border-color: #9c27b0; background: radial-gradient(circle at top, #311b92, #050505); }
+        .card.jazzghost:hover { box-shadow: 0 0 30px #b388ff, inset 0 0 10px rgba(156, 39, 176, 0.4); border-color: #e040fb; }
+        .card.jazzghost h2 { color: #e040fb; }
+
+        .card.mharhaia { border-color: #e040fb; background: linear-gradient(145deg, #220016, #050505); border-style: dashed; }
+        .card.mharhaia:hover { box-shadow: 0 0 25px rgba(255, 102, 204, 0.3); border-color: #ff66cc; }
+        .card.mharhaia h2 { color: #ff88cc; }
+
+        .card.raimundo-despertado { border-color: #00b8d4; background: linear-gradient(145deg, #001e22, #080808); box-shadow: 0 0 12px rgba(0, 229, 255, 0.15); display: none; }
+        .card.raimundo-despertado:hover { box-shadow: 0 0 30px #00e5ff, inset 0 0 12px rgba(241, 196, 15, 0.2); border-color: #f1c40f; }
+        .card.raimundo-despertado h2 { color: #00b8d4; }
+
+        .card.student { border-color: #333; }
+        .card.student:hover { border-color: #66bb6a; box-shadow: 0 0 20px rgba(129, 199, 132, 0.2); }
+        .card.student.adriell-aluno:hover { border-color: #f1c40f; box-shadow: 0 0 20px rgba(241, 196, 15, 0.3); }
+
+        .card.villain { border-color: #440000 !important; background: radial-gradient(circle at center, #2a0000, #050505) !important; box-shadow: 0 0 15px rgba(239, 83, 80, 0.2); }
+        .card.villain:hover { border-color: #e53935 !important; box-shadow: 0 0 25px rgba(255, 77, 77, 0.5) !important; }
+        .card.villain h2 { color: #ef5353 !important; }
+
+        .power-title { font-weight: bold; color: #e74c3c; margin-top: 15px; display: block; text-transform: uppercase; font-size: 0.8rem; }
+        .badge { background: #333; padding: 5px 10px; border-radius: 5px; font-size: 0.7rem; margin-bottom: 15px; display: inline-block; }
+
+        /* --- Modais --- */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.97); backdrop-filter: blur(10px); }
+        .modal-content { background: #111; margin: 5% auto; padding: 40px; border: 2px solid #f1c40f; width: 80%; max-width: 750px; border-radius: 20px; text-align: center; box-shadow: 0 0 50px rgba(0,0,0,0.8); }
+        .full-desc { font-size: 1.1rem; line-height: 1.8; color: #ccc; text-align: justify; }
+        .close-btn { color: #888; float: right; font-size: 30px; font-weight: bold; cursor: pointer; transition: color 0.2s; }
+        .close-btn:hover { color: #fff; }
+
+        /* --- Painel de Controle das abas escondidas --- */
+        .panel-controllers {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 280px;
+        }
+        .ctrl-toggle-btn {
+            background: #161616;
+            border: 1px solid #333;
+            color: #aaa;
+            padding: 10px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+        .ctrl-toggle-btn:hover {
+            border-color: #f1c40f;
+            color: #fff;
+            background: #222;
+        }
+
+        /* --- Módulos Escondidos --- */
+        .terminal-container {
+            display: none;
+            background: #0a0a0a;
+            border: 2px solid #222;
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
+            text-align: center;
+        }
+        .terminal-container h3 { margin: 0 0 8px 0; font-size: 0.75rem; letter-spacing: 1px; color: #f1c40f; text-transform: uppercase; }
+        .terminal-display {
+            background: #000;
+            border: 1px solid #1a1a1a;
+            border-radius: 6px;
+            padding: 8px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.1rem;
+            color: #00ffaa;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            min-height: 22px;
+            word-wrap: break-word;
+            text-transform: uppercase;
+        }
+        
+        /* Layout Alfanumérico Expandido */
+        .terminal-keyboard { 
+            display: grid; 
+            grid-template-columns: repeat(6, 1fr); 
+            gap: 4px; 
+        }
+        .term-btn { background: #111; border: 1px solid #222; color: #ccc; padding: 6px 2px; font-size: 0.8rem; font-weight: bold; border-radius: 4px; cursor: pointer; text-transform: uppercase;}
+        .term-btn:hover { background: #1a1a1a; border-color: #f1c40f; color: #f1c40f; }
+        .term-btn.clear { background: #220a0a; color: #ff4d4d; border-color: #3a1111; grid-column: span 2; }
+        .term-btn.enter { background: #0a2214; color: #00ffaa; border-color: #113a1e; grid-column: span 2; }
+        .term-btn.space { grid-column: span 2; font-size: 0.7rem; }
+
+        .index-container {
+            display: none;
+            background: #0a0a0a;
+            border: 1px solid #222;
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 0.75rem;
+            max-height: 260px;
+            overflow-y: auto;
+        }
+        .index-container h4 { margin: 0 0 8px 0; color: #888; text-transform: uppercase; border-bottom: 1px solid #222; padding-bottom: 4px; }
+        .index-list { list-style: none; padding: 0; margin: 0; text-align: left; display: flex; flex-direction: column; gap: 5px; }
+        .index-item { display: flex; justify-content: space-between; color: #aaa; }
+        .index-item.unlocked { color: #00ffaa; }
+        .index-item.locked { color: #555; font-style: italic; }
+
+        /* --- Estilos do Painel Admin Ocultado --- */
+        .admin-box {
+            background: #111;
+            border: 2px dashed #ff3333;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 900px;
+            width: 95%;
+            margin: 20px auto;
+            box-shadow: 0 0 30px rgba(255, 51, 51, 0.15);
+        }
+        .admin-box h2 { color: #ff3333; text-transform: uppercase; letter-spacing: 2px; margin-top: 0; text-align: center;}
+        .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-top: 20px; }
+        .admin-field { display: flex; flex-direction: column; gap: 8px; }
+        .admin-field label { font-size: 0.85rem; font-weight: bold; color: #aaa; text-transform: uppercase;}
+        .admin-field input, .admin-field select, .admin-field textarea {
+            background: #000; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 6px; font-family: inherit;
+        }
+        .admin-field input:focus, .admin-field select:focus, .admin-field textarea:focus { border-color: #ff3333; outline: none; }
+        
+        .admin-actions-cluster {
+            grid-column: 1 / -1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 15px;
+            border-top: 1px dashed #333;
+            padding-top: 20px;
+        }
+        .admin-btn {
+            flex: 1; min-width: 180px; background: #ff3333; color: #000; font-weight: bold; text-transform: uppercase;
+            padding: 14px; border: none; border-radius: 8px; cursor: pointer; transition: all 0.3s; font-size: 0.9rem;
+        }
+        .admin-btn:hover { background: #ff6666; box-shadow: 0 0 15px rgba(255, 51, 51, 0.4); }
+        .admin-btn.secondary { background: #161616; color: #ff3333; border: 1px solid #ff3333; }
+        .admin-btn.secondary:hover { background: #ff3333; color: #000; }
+        .admin-btn.blue-btn { background: #00bcd4; color: #000; }
+        .admin-btn.blue-btn:hover { background: #b2ebf2; box-shadow: 0 0 15px rgba(0, 188, 212, 0.4); }
+
+        /* Sub-Módulos Funcionais Exclusivos */
+        .cluster-section-title {
+            grid-column: 1 / -1;
+            font-size: 0.9rem;
+            color: #ff3333;
+            text-transform: uppercase;
+            font-weight: bold;
+            border-bottom: 1px dashed #333;
+            padding-bottom: 5px;
+            margin-top: 10px;
+        }
+        .aba-ain-logs {
+            grid-column: 1 / -1;
+            background: #000;
+            border: 1px dashed #ff3333;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Courier New', Courier, monospace;
+            color: #ff4d4d;
+            font-size: 0.85rem;
+            max-height: 220px;
+            overflow-y: auto;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-all;
+        }
+        .aba-ain-logs p { margin: 4px 0; line-height: 1.4; }
+    </style>
+</head>
+<body>
+
+    <!-- TELA DE AUTENTICAÇÃO INICIAL (GATEKEEPER) -->
+    <div id="site-gatekeeper">
+        <div class="gatekeeper-box">
+            <h2>Panteão Supremo Core</h2>
+            <label for="gatekeeper-password">Quem é o dono do site?</label>
+            <input type="password" id="gatekeeper-password" class="gatekeeper-input" placeholder="Insira a resposta existencial..." onkeydown="if(event.key === 'Enter') verifyGatekeeperAccess()">
+            <br>
+            <button class="gatekeeper-btn" onclick="verifyGatekeeperAccess()">Autenticar Fenda</button>
+            <p id="gatekeeper-error-msg" class="gatekeeper-error">Resposta Incorreta! Você não possui aura para entrar.</p>
+        </div>
+    </div>
+
+    <header>
+        <h1 id="main-site-title">THE GOATS | PANTEÃO SUPREMO</h1>
+        <p class="subtitle" id="main-site-subtitle">A realidade governada pela caneta e pelo saber.</p>
+    </header>
+
+    <div class="ticker-container">
+        <span id="ticker" class="ticker-text">Carregando diretrizes do panteão...</span>
+    </div>
+
+    <!-- Menu de Abas -->
+    <div class="tabs-menu" id="menu-abas">
+        <button class="tab-btn active" onclick="switchTab('principal', this)">Panteão Principal</button>
+        <button class="tab-btn" id="btn-aba-especial" onclick="switchTab('especiais', this)">GOATs Alternativos 👑</button>
+        <button class="tab-btn" id="btn-aba-admin" onclick="switchTab('admin', this)">🛡️ Admin Core</button>
+    </div>
+
+    <!-- ABA 1: PANTEÃO PRINCIPAL -->
+    <div id="tab-principal" class="tab-content active">
+        <div class="container" id="container-principal">
+            
+            <!-- JESUS CRISTO -->
+            <div class="card jesus" id="jesus-card-original" data-id="jesus" onclick="openModalById('jesus')">
+                <span class="badge badge-tag" style="background: #f1c40f; color: #000; font-weight: bold;">CÓDIGO: 1111</span>
+                <h2 class="card-name">Jesus Cristo</h2>
+                <span class="power-title power-text" style="color: #fff;">Poder: Providência Soberana</span>
+            </div>
+
+            <!-- LULA -->
+            <div class="card lula" data-id="lula" onclick="openModalById('lula')">
+                <span class="badge badge-tag">IDENTIDADE: PRESIDENTE</span>
+                <h2 class="card-name">O Mandatário Supremo</h2>
+                <span class="power-title power-text">Poder: Arquiteto do State</span>
+            </div>
+
+            <!-- SEDUC -->
+            <div class="card seduc" data-id="seduc" onclick="openModalById('seduc')">
+                <span class="badge badge-tag">IDENTIDADE: INSTITUIÇÃO</span>
+                <h2 class="card-name">A Gestora de Mundos</h2>
+                <span class="power-title power-text">Poder: Domínio de Sistemas</span>
+            </div>
+
+            <!-- SÔNIA -->
+            <div class="card sonia" data-id="sonia" onclick="openModalById('sonia')">
+                <span class="badge badge-tag">IDENTIDADE: DIRETORA</span>
+                <h2 class="card-name">A Diretora Absoluta</h2>
+                <span class="power-title power-text">Poder: Transcendência de Formas</span>
+            </div>
+
+            <!-- BOSS FINAL -->
+            <div class="card final-boss" data-id="boss-final" onclick="openModalById('boss-final')">
+                <span class="badge badge-tag" style="background: #f1c40f; color: #000; font-weight: bold;">IDENTIDADE: COORDENADOR</span>
+                <h2 class="card-name">O Guardião Técnico</h2>
+                <span class="power-title power-text" style="color: #fff;">Poder: Veredito Final</span>
+            </div>
+
+            <!-- GOD CHAVIER -->
+            <div class="card god" data-id="god-chavier" onclick="openModalById('god-chavier')">
+                <span class="badge badge-tag" style="background: #00d4ff; color: #000;">IDENTIDADE: VIGIA</span>
+                <h2 class="card-name">O Vigilante Multitarefa</h2>
+                <span class="power-title power-text">Poder: Infinitude de Tarefas</span>
+            </div>
+
+            <!-- MARCELO -->
+            <div class="card marcelo" data-id="marcelo" onclick="openModalById('marcelo')">
+                <span class="badge badge-tag" style="background: #673ab7;">IDENTIDADE: FILOSOFIA</span>
+                <h2 class="card-name">O Arquiteto do Thought</h2>
+                <span class="power-title power-text" style="color: #b39ddb;">Poder: Lógica Existencial</span>
+            </div>
+
+            <!-- GILKELLY -->
+            <div class="card" style="border-color: #00bcd4;" data-id="gilkelly" onclick="openModalById('gilkelly')">
+                <span class="badge badge-tag" style="background: #00bcd4; color: #000;">IDENTIDADE: PORTUGUÊS</span>
+                <h2 class="card-name" style="color: #80deea;">A Mestra da Língua</h2>
+                <span class="power-title power-text">Poder: Verbo Absoluto</span>
+            </div>
+
+            <!-- RAFAEL -->
+            <div class="card" style="border-color: #ffcc00;" data-id="rafael" onclick="openModalById('rafael')">
+                <span class="badge badge-tag" style="background: #ffcc00; color: #000;">IDENTIDADE: GEOGRAFIA</span>
+                <h2 class="card-name" style="color: #ffcc00;">O Geógrafo do Vazio</h2>
+                <span class="power-title power-text" style="color: #ffcc00;">Poder: Ultimato de Expulsão</span>
+            </div>
+
+            <!-- BOMBADAO -->
+            <div class="card" style="border-color: #ff5722;" data-id="bombadao" onclick="openModalById('bombadao')">
+                <span class="badge badge-tag" style="background: #ff5722;">IDENTIDADE: ARTES</span>
+                <h2 class="card-name" style="color: #ff5722;">O Titã da Matéria</h2>
+                <span class="power-title power-text" style="color: #ff5722;">Poder: Colapso de Matéria</span>
+            </div>
+
+            <!-- FERNANDA -->
+            <div class="card" style="border-color: #00ffaa;" data-id="fernanda" onclick="openModalById('fernanda')">
+                <span class="badge badge-tag" style="background: #00ffaa; color: #000;">IDENTIDADE: IA/ESPANHOL</span>
+                <h2 class="card-name" style="color: #00ffaa;">A Arquiteta Digital</h2>
+                <span class="power-title power-text" style="color: #00ffaa;">Poder: IA & Verbo Hispânico</span>
+            </div>
+
+            <!-- MARCOS VINICIOS -->
+            <div class="card" data-id="marcos-vinicios" onclick="openModalById('marcos-vinicios')">
+                <span class="badge badge-tag">IDENTIDADE: INFORMÁTICA</span>
+                <h2 class="card-name">Divindade Original</h2>
+                <span class="power-title power-text">Poder: Onipotência Criativa</span>
+            </div>
+
+            <!-- DR. JOSENILDO -->
+            <div class="card" data-id="dr-josenildo" onclick="openModalById('dr-josenildo')">
+                <span class="badge badge-tag">IDENTIDADE: BIOLOGIA</span>
+                <h2 class="card-name">Mestre Bio-Sapiens</h2>
+                <span class="power-title power-text">Poder: Supremacia Bio-Sapiens</span>
+            </div>
+
+            <!-- RENATO FERREIRA -->
+            <div class="card" data-id="renato-ferreia" onclick="openModalById('renato-ferreia')">
+                <span class="badge badge-tag">IDENTIDADE: INGLÊS</span>
+                <h2 class="card-name">Poliglota Arcano</h2>
+                <span class="power-title power-text">Poder: Manipulação Linguística</span>
+            </div>
+
+            <!-- EDIO -->
+            <div class="card edio" data-id="edio" onclick="openModalById('edio')">
+                <span class="badge badge-tag" style="background: #03a9f4; color: #fff;">IDENTIDADE: MATEMÁTICA</span>
+                <h2 class="card-name">O Juiz do Valor Absoluto</h2>
+                <span class="power-title power-text" style="color: #e0f7fa;">Poder: Validação Axiomática</span>
+            </div>
+
+            <!-- GILLES (VILÃO) -->
+            <div class="card villain" data-id="gilles" onclick="openModalById('gilles')">
+                <span class="badge badge-tag" style="background: #500; color: #ff9999;">IDENTIDADE: INFORMÁTICA</span>
+                <h2 class="card-name">O Oculto</h2>
+                <span class="power-title power-text" style="color: #ff4d4d;">Poder: Onipotência Negativa</span>
+            </div>
+
+            <!-- ALUNOS -->
+            <div class="card student" data-id="raimundo" onclick="openModalById('raimundo')">
+                <span class="badge badge-tag">#06 - ALUNO</span>
+                <h2 class="card-name">Raimundo</h2>
+                <span class="power-title power-text">Poder: Aura Oscilante</span>
+            </div>
+
+            <!-- MARIAH -->
+            <div class="card student" style="border-color: #ff66cc;" data-id="mariah" onclick="openModalById('mariah')">
+                <span class="badge badge-tag" style="background: #ff66cc; color: #000;">#12 - ALUNA</span>
+                <h2 class="card-name" style="color: #ff99dd;">Mariah</h2>
+                <span class="power-title power-text" style="color: #ff99dd;">Poder: Cheats Ocultos</span>
+            </div>
+
+            <div class="card student" data-id="enzo" onclick="openModalById('enzo')">
+                <span class="badge badge-tag">#08 - ALUNO</span>
+                <h2 class="card-name" style="color: #81c784;">Enzo</h2>
+                <span class="power-title power-text" style="color: #81c784;">Poder: Aura Refinada</span>
+            </div>
+
+            <div class="card student" data-id="lorran" onclick="openModalById('lorran')">
+                <span class="badge badge-tag">#10 - ALUNO</span>
+                <h2 class="card-name" style="color: #ff9800;">Lorran</h2>
+                <span class="power-title power-text" style="color: #ff9800;">Poder: Replicação Caótica</span>
+            </div>
+
+            <!-- ADRIELL ALUNO -->
+            <div class="card student adriell-aluno" data-id="adriell-aluno" onclick="handleAdriellClick(event)">
+                <span class="badge badge-tag">#07 - ALUNO 🔥</span>
+                <h2 class="card-name">Adriell</h2>
+                <span class="power-title power-text">Poder: saBOOr</span>
+            </div>
+
+            <div class="card student" data-id="gnomo" onclick="openModalById('gnomo')">
+                <span class="badge badge-tag">#11 - ALUNA</span>
+                <h2 class="card-name" style="color: #81c784;">Gnomo</h2>
+                <span class="power-title power-text" style="color: #81c784;">Poder: Encolhimento Tático</span>
+            </div>
+
+            <div class="card student" style="border-color: #3f51b5;" data-id="pocoyo" onclick="openModalById('pocoyo')">
+                <span class="badge badge-tag">#?? - BLOQUEADO</span>
+                <h2 class="card-name" style="color: #5c6bc0;">Pocoyo</h2>
+                <span class="power-title power-text" style="color: #5c6bc0;">Poder: Sombra 3D</span>
+            </div>
+
+            <div class="card student" data-id="luiz" onclick="openModalById('luiz')">
+                <span class="badge badge-tag">#09 - ALUNO</span>
+                <h2 class="card-name" style="color: #ffeb3b;">Luiz</h2>
+                <span class="power-title power-text" style="color: #ffeb3b;">Poder: Surto Coletivo</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ABA 2: GOATs ALTERNATIVOS -->
+    <div id="tab-especiais" class="tab-content">
+        <div class="top-pyramid-section">
+            <!-- Painel de Controles Ocultos -->
+            <div class="panel-controllers">
+                <button class="ctrl-toggle-btn" onclick="toggleSecretModule('terminal-container')">⌨️ Terminal Code</button>
+                <button class="ctrl-toggle-btn" onclick="toggleSecretModule('index-container')">📜 Index List</button>
+
+                <!-- Terminal de Código Alfanumérico Expandido -->
+                <div class="terminal-container" id="terminal-module">
+                    <h3>Terminal Index</h3>
+                    <div class="terminal-display" id="display-term">----</div>
+                    <div class="terminal-keyboard">
+                        <!-- Números -->
+                        <button class="term-btn" onclick="pressKey('1')">1</button>
+                        <button class="term-btn" onclick="pressKey('2')">2</button>
+                        <button class="term-btn" onclick="pressKey('3')">3</button>
+                        <button class="term-btn" onclick="pressKey('4')">4</button>
+                        <button class="term-btn" onclick="pressKey('5')">5</button>
+                        <button class="term-btn" onclick="pressKey('6')">6</button>
+                        <button class="term-btn" onclick="pressKey('7')">7</button>
+                        <button class="term-btn" onclick="pressKey('8')">8</button>
+                        <button class="term-btn" onclick="pressKey('9')">9</button>
+                        <button class="term-btn" onclick="pressKey('0')">0</button>
+                        
+                        <!-- Letras -->
+                        <button class="term-btn" onclick="pressKey('A')">A</button>
+                        <button class="term-btn" onclick="pressKey('B')">B</button>
+                        <button class="term-btn" onclick="pressKey('C')">C</button>
+                        <button class="term-btn" onclick="pressKey('D')">D</button>
+                        <button class="term-btn" onclick="pressKey('E')">E</button>
+                        <button class="term-btn" onclick="pressKey('F')">F</button>
+                        <button class="term-btn" onclick="pressKey('G')">G</button>
+                        <button class="term-btn" onclick="pressKey('H')">H</button>
+                        <button class="term-btn" onclick="pressKey('I')">I</button>
+                        <button class="term-btn" onclick="pressKey('J')">J</button>
+                        <button class="term-btn" onclick="pressKey('K')">K</button>
+                        <button class="term-btn" onclick="pressKey('L')">L</button>
+                        <button class="term-btn" onclick="pressKey('M')">M</button>
+                        <button class="term-btn" onclick="pressKey('N')">N</button>
+                        <button class="term-btn" onclick="pressKey('O')">O</button>
+                        <button class="term-btn" onclick="pressKey('P')">P</button>
+                        <button class="term-btn" onclick="pressKey('Q')">Q</button>
+                        <button class="term-btn" onclick="pressKey('R')">R</button>
+                        <button class="term-btn" onclick="pressKey('S')">S</button>
+                        <button class="term-btn" onclick="pressKey('T')">T</button>
+                        <button class="term-btn" onclick="pressKey('U')">U</button>
+                        <button class="term-btn" onclick="pressKey('V')">V</button>
+                        <button class="term-btn" onclick="pressKey('W')">W</button>
+                        <button class="term-btn" onclick="pressKey('X')">X</button>
+                        <button class="term-btn" onclick="pressKey('Y')">Y</button>
+                        <button class="term-btn" onclick="pressKey('Z')">Z</button>
+                        
+                        <!-- Comandos -->
+                        <button class="term-btn space" onclick="pressKey(' ')">Espaço</button>
+                        <button class="term-btn clear" onclick="pressKey('RESET')">Limpar</button>
+                        <button class="term-btn enter" onclick="pressKey('CONFIRM')">Enviar</button>
+                    </div>
+                </div>
+
+                <!-- Index / Catálogo Dimensional Escondido -->
+                <div class="index-container" id="index-module">
+                    <h4>Catálogo Geral do Panteão</h4>
+                    <ul class="index-list" id="index-list-element">
+                        <li class="index-item locked" id="idx-jesus"><span>O Verbo Primordial</span> <span>[🔒]</span></li>
+                        <li class="index-item unlocked"><span>Lula (Presidente)</span> <span>[✔]</span></li>
+                        <li class="index-item unlocked"><span>SEDUC (Instituição)</span> <span>[✔]</span></li>
+                        <li class="index-item unlocked"><span>Sônia (Diretora)</span> <span>[✔]</span></li>
+                        <li class="index-item unlocked"><span>Boss Final (Segurança)</span> <span>[✔]</span></li>
+                        <li class="index-item unlocked"><span>God Chavier (Vigia)</span> <span>[✔]</span></li>
+                        <li class="index-item unlocked"><span>Marcelo (Filosofia)</span> <span>[✔]</span></li>
+                        <li class="index-item unlocked"><span>Gilkelly (Português)</span> <span>[✔]</span></li>
+                        <li class="index-item unlocked"><span>Rafael (Geografia)</span> <span>[✔]</span></li>
+                        <li class="index-item unlocked"><span>Bombadão (Artes)</span> <span>[✔]</span></li>
+                        <li class="index-item unlocked"><span>Fernanda (IA)</span> <span>[✔]</span></li>
+                        <li class="index-item unlocked"><span>Marcos V. (Informática)</span> <span>[✔]</span></li>
+                        <li class="index-item unlocked"><span>Dr. Josenildo (Biologia)</span> <span>[✔]</span></li>
+                        <li class="index-item unlocked"><span>Renato F. (Inglês)</span> <span>[✔]</span></li>
+                        <li class="index-item unlocked"><span>Edio (Matemática)</span> <span>[✔]</span></li>
+                        <li class="index-item unlocked"><span>Gilles (Oculto)</span> <span>[✔]</span></li>
+                        <li class="index-item unlocked"><span>Alunos (06 ao 12)</span> <span>[✔]</span></li>
+                        <li class="index-item locked" id="idx-raimundo-despertado"><span>Raimundo Despertado</span> <span>[🔒]</span></li>
+                        <li class="index-item unlocked"><span>Mharhaia Otimizada</span> <span>[✔]</span></li>
+                        <li class="index-item unlocked"><span>Lorrane Singularidade</span> <span>[✔]</span></li>
+                        <li class="index-item unlocked"><span>Jazzghost (Gameplays)</span> <span>[✔]</span></li>
+                        <li class="index-item unlocked"><span>Donald Trump</span> <span>[✔]</span></li>
+                        <li class="index-item unlocked"><span>Jojo Todinho</span> <span>[✔]</span></li>
+                        <li class="index-item locked" id="idx-tigrinho"><span>O Senhor da Sorte</span> <span>[🔒]</span></li>
+                        <li class="index-item locked" id="idx-adriell-supremo"><span>O Soberano Oculto do Vazio</span> <span>[🔒]</span></li>
+                        <li class="index-item locked" id="idx-amostradinho"><span>O Ceifador do Ciclo Vital</span> <span>[🔒]</span></li>
+                        <li class="index-item locked" id="idx-admin"><span>Nível de Acesso Root Admin</span> <span>[🔒]</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- CARDS SUPREMOS -->
+            <div class="card adriell-topo" id="adriell-card-supremo" data-id="adriell-supremo" onclick="handleAdriellSupremoClick(event)">
+                <span class="badge badge-tag" style="background: #f1c40f; color: #000; font-weight: bold;">👑 TOPO DA PIRÂMIDE</span>
+                <h2 class="card-name">Adriell Supremo</h2>
+                <span class="power-title power-text">Poder: Domínio sobre o Panteão</span>
+            </div>
+
+            <div class="card amostradinho-topo" id="amostradinho-card-supremo" data-id="amostradinho" onclick="openModalById('amostradinho')">
+                <span class="badge badge-tag" style="background: #ff4d4d; color: #fff; font-weight: bold;">💀 ENTIDADE DO DESTINO</span>
+                <h2 class="card-name">Amostradinho</h2>
+                <span class="power-title power-text">Poder: Controle do Ciclo Vital</span>
+            </div>
+        </div>
+
+        <div class="container" id="container-especiais">
+            <!-- RAIMUNDO DESPERTADO -->
+            <div class="card raimundo-despertado" id="raimundo-card-despertado" data-id="raimundo-despertado" onclick="openModalById('raimundo-despertado')">
+                <span class="badge badge-tag" style="background: #00e5ff; color: #000; font-weight: bold;">🔥 VERSÃO DESPERTADA</span>
+                <h2 class="card-name">Raimundo Despertado</h2>
+                <span class="power-title power-text" style="color: #fff;">Poder: Fluxo Temporal Absoluto</span>
+            </div>
+
+            <!-- JAZZGHOST -->
+            <div class="card jazzghost" data-id="jazzghost" onclick="openModalById('jazzghost')">
+                <span class="badge badge-tag" style="background: #9c27b0; color: #fff; font-weight: bold;">🎮 GOAT ARQUITETO</span>
+                <h2 class="card-name">Jazzghost</h2>
+                <span class="power-title power-text">Poder: Mecânicas de Jegue e Gameplays</span>
+            </div>
+
+            <!-- MHARHAIA -->
+            <div class="card mharhaia" data-id="mharhaia" onclick="openModalById('mharhaia')">
+                <span class="badge badge-tag" style="background: #ff66cc; color: #fff; font-weight: bold;">✨ VERSÃO ALTERNATIVA (+10%)</span>
+                <h2 class="card-name">Mharhaia</h2>
+                <span class="power-title power-text" style="color: #fff;">Poder: Cheats Ocultos Estendidos</span>
+            </div>
+
+            <!-- LORRANE -->
+            <div class="card lorrane" data-id="lorrane" onclick="openModalById('lorrane')">
+                <span class="badge badge-tag" style="background: #ff5722; color: #fff;">👑 ANOMALIA CÓSMICA</span>
+                <h2 class="card-name">Lorrane</h2>
+                <span class="power-title power-text">Poder: Força Inversa Anti-Nerf</span>
+            </div>
+
+            <!-- TRUMP -->
+            <div class="card trump" data-id="trump" onclick="openModalById('trump')">
+                <span class="badge badge-tag" style="background: #3f51b5; color: #fff;">IDENTIDADE: PRESIDENTE EUA</span>
+                <h2 class="card-name">O Comandante Federal</h2>
+                <span class="power-title power-text">Poder: Arquiteto do Capital</span>
+            </div>
+
+            <!-- JOJO TODINHO -->
+            <div class="card jojo" data-id="jojo" onclick="openModalById('jojo')">
+                <span class="badge badge-tag" style="background: #e91e63; color: #fff;">IDENTIDADE: FISCAL DO PANTEÃO</span>
+                <h2 class="card-name">A Voz da Indignação</h2>
+                <span class="power-title power-text">Poder: Reclamação Destrutiva</span>
+            </div>
+
+            <!-- TIGRINHO -->
+            <div class="card tigrinho" id="tigrinho-card" data-id="tigrinho" onclick="openModalById('tigrinho')">
+                <span class="badge badge-tag" style="background: #4caf50; color: #fff;">IDENTIDADE: ENTIDADE DA FORTUNA</span>
+                <h2 class="card-name">O Senhor da Sorte</h2>
+                <span class="power-title power-text">Poder: Cartinha da Fortuna ou Miséria</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ABA 3: PAINEL DE ADMINISTRADOR Oculto -->
+    <div id="tab-admin" class="tab-content">
+        <div class="admin-box">
+            <h2>🛡️ Painel do Administrador (Real-Time Editor)</h2>
+            <p style="text-align: center; color: #ff3333; font-weight: bold; font-size: 0.9rem;" id="adm-nivel-alerta">Autenticação Requerida...</p>
+            
+            <div class="admin-grid">
+                <div class="admin-field" style="grid-column: 1 / -1;">
+                    <label>Selecionar GOAT/Aluno para Modificar</label>
+                    <select id="adm-select-char" onchange="loadCharToAdmin()">
+                        <!-- Carregado via JS -->
+                    </select>
+                </div>
+
+                <div class="admin-field" style="grid-column: 1 / -1;" id="field-adm-desc">
+                    <label>Descrição Completa do Paradoxo (Modal)</label>
+                    <textarea id="adm-char-desc" rows="4"></textarea>
+                </div>
+
+                <div class="admin-field" id="field-adm-stats">
+                    <label>Definir Estatísticas Avançadas (Títulos/Gols)</label>
+                    <input type="text" id="adm-char-stats" placeholder="Ex: 12 Títulos Absolutos">
+                </div>
+
+                <div class="admin-field" id="field-adm-glitch-effect">
+                    <label>Injetar Efeitos Visuais na Matriz 🔮</label>
+                    <select id="adm-char-glitch" onchange="aplicarEfeitoVisualTemporario()">
+                        <option value="nenhum">Nenhum Estresse Visual</option>
+                        <option value="glitch">Frequência Glitch (Tremores)</option>
+                    </select>
+                </div>
+
+                <div class="admin-field block-aura-only">
+                    <label>Nome / Título Visual 👑</label>
+                    <input type="text" id="adm-char-name">
+                </div>
+                <div class="admin-field block-aura-only">
+                    <label>Identidade / Badge Tag 👑</label>
+                    <input type="text" id="adm-char-badge">
+                </div>
+                <div class="admin-field block-aura-only" style="grid-column: 1 / -1;">
+                    <label>Nome do Poder Principal 👑</label>
+                    <input type="text" id="adm-char-power">
+                </div>
+                <div class="admin-field block-aura-only">
+                    <label>Alocação de Container (Destino Visual) 👑</label>
+                    <select id="adm-char-container">
+                        <option value="principal">Panteão Principal</option>
+                        <option value="especiais">GOATs Alternativos</option>
+                    </select>
+                </div>
+                <div class="admin-field block-aura-only">
+                    <label>Status de Destaque no Panteão 👑</label>
+                    <select id="adm-char-highlight">
+                        <option value="normal">Normal (Card Padrão)</option>
+                        <option value="destaque">Destaque Máximo (Glow Dourado)</option>
+                    </select>
+                </div>
+
+                <!-- CAMPO DE CODIGO DE BLOQUEIO PERSONALIZADO -->
+                <div class="admin-field block-aura-only" style="grid-column: 1 / -1; border-top: 1px dashed #444; padding-top: 10px;">
+                    <label style="color: #ffaa00;">Injetar Código de Restrição (Trancar no Terminal) 🔒</label>
+                    <input type="text" id="adm-char-lock-code" placeholder="Ex: 8888 (Deixe vazio para livre acesso)">
+                </div>
+
+                <!-- CLUSTER DE AÇÕES MASTER CORE -->
+                <div class="admin-actions-cluster">
+                    <button class="admin-btn" onclick="applyRealTimeModifications()">⚡ Aplicar Alterações</button>
+                    <button class="admin-btn secondary" style="border-color: #f1c40f; color: #f1c40f;" onclick="triggerUndoAction()">⟲ Reverter Última Alteração</button>
+                    <button class="admin-btn secondary" style="border-color: #00ffaa; color: #00ffaa;" onclick="createNewGoatEntity()">✨ Criar Novo GOAT</button>
+                    <button class="admin-btn secondary block-aura-only" style="border-color: #ff3333; color: #ff3333;" onclick="deleteSelectedEntity()">🗑️ Deletar Entidade</button>
+                    <button class="admin-btn secondary block-aura-only" onclick="toggleVillainStatus()">☯️ Inverter Alinhamento (Vilão)</button>
+                </div>
+
+                <!-- SEÇÃO ADICIONAL EXCLUSIVA DO ADMIN -->
+                <div class="cluster-section-title block-aura-only">Painel de Ações Diretas - Master Core (Senha: adriell135)</div>
+                <div class="admin-actions-cluster block-aura-only" style="border: none; padding: 0; margin: 0;">
+                    <button class="admin-btn blue-btn" onclick="desbloquearTodoCatalogo()">🔓 Desbloquear Catálogo Completo</button>
+                    <button class="admin-btn blue-btn" onclick="freezeEngineToggle()">❄️ Freeze Engine (Cliques)</button>
+                    <button class="admin-btn" style="background: #e67e22; color: #000;" onclick="ativarAutodestruicaoTemporizada()">💥 Autodestruição Temporizada</button>
+                    
+                    <button class="admin-btn blue-btn" style="background: #9c27b0; color: #fff;" onclick="bombaDeAuraAbsoluta()">☀️ Bomba de Aura Absoluta (Alunos)</button>
+                    <button class="admin-btn" style="background: #4caf50; color: #000;" onclick="alterarCodigoEmTempoReal()">🔑 Modificar Chave de Criptografia</button>
+                    
+                    <button class="admin-btn" style="background: #e91e63; color: #fff;" onclick="injetarFrequenciaMusical()">🎵 Injetar Sintonia Phonk/Hyperpop</button>
+                    <button class="admin-btn" style="background: #ffeb3b; color: #000;" onclick="gerarRelatorioAuraInstantaneo()">📊 Gerar Log Analítico de Auras</button>
+                    <button class="admin-btn" style="background: #2196f3; color: #fff;" onclick="estressarServidoresData()">🗄️ Forçar Processamento de Dados (Server)</button>
+
+                    <button class="admin-btn" style="background: #ff3333; color: #ffffff;" onclick="injetarBugMatrizCompleta()">👾 Injetar Bug na Matriz Completa</button>
+                    <button class="admin-btn" style="background: #6a1b9a; color: #ffffff;" onclick="reescreverMemoriaColetiva()">🧠 Reescrever Memória Escolar</button>
+                    <button class="admin-btn" style="background: #000000; color: #ff3333; border: 1px solid #ff3333;" onclick="decretarGreveGeral()">🛑 Decretar Greve Geral (Travar Site)</button>
+                    
+                    <!-- NOVAS FUNÇÕES EXCLUSIVAS DA ABA ADM COMPLETA -->
+                    <button class="admin-btn" style="background: #cfd8dc; color: #000000;" onclick="injetarNotaZeroProfessores()">📝 Injetar Nota Zero (Guerra da SEDUC)</button>
+                    <button class="admin-btn" style="background: #ff5722; color: #ffffff;" onclick="modoServerPhonkAltaVoltagem()">⚡ Modo Server Phonk (Alta Voltagem)</button>
+                    <button class="admin-btn" style="background: #00e5ff; color: #000000;" onclick="inversaoDimensionalMatriz()">☯️ Inversão Dimensional Aluno/Professor</button>
+                    
+                    <!-- NOVAS EXTENSÕES DISPONÍVEIS NA VERSÃO TOTAL UNLOCKED -->
+                    <button class="admin-btn" style="background: #ff9800; color: #000000;" onclick="injetarSlogansBranding()">🔥 Injetar Slogans SABOR & disnutres</button>
+                    <button class="admin-btn" style="background: #009688; color: #ffffff;" onclick="sincronizarServidoresHospedagem()">🌐 Sincronizar Data Centers de Rede</button>
+                    <button class="admin-btn" style="background: #3f51b5; color: #ffffff;" onclick="modoSurtoColetivoAbsoluto()">🧠 Ativar Surto Coletivo Absoluto</button>
+                    <button class="admin-btn" style="background: #e91e63; color: #ffffff;" onclick="gerarConviteAniversarioPrimeiroAno()">🎂 Forçar Convite de Aniversário 1 Ano</button>
+
+                    <!-- FUNCIONALIDADES ADICIONAIS EXPANDIDAS DE CONTROLE TOTAL -->
+                    <button class="admin-btn" style="background: #795548; color: #ffffff;" onclick="mutarVozDaIndignacao()">🔇 Silenciar Reclamações (Anti-Jojo)</button>
+                    <button class="admin-btn" style="background: #607d8b; color: #ffffff;" onclick="injetarModificadorDeBanca()">🃏 Riggar Sorte do Tigrinho (Ganho 100%)</button>
+                    <button class="admin-btn" style="background: #9e9e9e; color: #000000;" onclick="gerarApocalipseDeClones()">👥 Instanciar Apocalipse de Clones (Lorran)</button>
+                    <button class="admin-btn" style="background: #aeea00; color: #000000;" onclick="ativarModoInvisivelPocoyo()">👤 Ativar Sombra Total 3D em Lote</button>
+                </div>
+
+                <div class="admin-field block-aura-only" style="grid-column: 1 / -1;">
+                    <label style="color: #ff3333;">Modificar Dados do Site Globalmente</label>
+                    <div style="display: flex; gap: 10px; margin-top: 5px;">
+                        <input type="text" id="adm-global-subtitle" placeholder="Alterar Subtítulo do Panteão">
+                        <button class="admin-btn" style="margin: 0; width: auto; padding: 0 15px; font-size: 0.8rem;" onclick="alterarSubtituloGlobal()">Mudar</button>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 5px;">
+                        <input type="text" id="adm-global-ticker" placeholder="Injetar Frase Dinâmica no Ticker">
+                        <button class="admin-btn" style="margin: 0; width: auto; padding: 0 15px; font-size: 0.8rem;" onclick="injetarFraseNoTicker()">Injetar</button>
+                    </div>
+                </div>
+
+                <!-- ABA AIN - LOGS DE EVENTOS RESPONSIVOS -->
+                <div class="cluster-section-title">Aba AIN | Monitoramento de Atividade do Sistema</div>
+                <div class="aba-ain-logs" id="ain-logs-box">
+                    <p><strong>[SISTEMA]:</strong> Painel AIN Ativo. Aguardando interações da matriz...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estrutura do Modal -->
+    <div id="goatModal" class="modal">
+        <div class="modal-content" id="modalContent">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h2 id="modalName" style="font-size: 2.2rem; margin-bottom: 5px;"></h2>
+            <h3 id="modalTitle" style="color: #e74c3c; text-transform: uppercase; letter-spacing: 2px; font-size: 1rem;"></h3>
+            <div id="modalStats" style="color: #f1c40f; font-weight: bold; font-size: 0.9rem; margin-top: 5px; text-transform: uppercase;"></div>
+            <hr style="border: 0; border-top: 1px solid #333; margin: 20px 0;">
+            <p id="modalDesc" class="full-desc"></p>
+        </div>
+    </div>
+
+    <script>
+        // --- GERENCIADOR DE ÁUDIO NATIVO ---
+        const AudioEngine = {
+            ctx: null,
+            init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+            play(type, freq, duration, vol = 0.1) {
+                try {
+                    this.init();
+                    let osc = this.ctx.createOscillator();
+                    let gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.00001, this.ctx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch(e) {}
+            },
+            beep() { this.play('sine', 600, 0.1, 0.15); },
+            click() { this.play('triangle', 150, 0.05, 0.3); },
+            success() { this.play('sine', 880, 0.15, 0.2); setTimeout(() => this.play('sine', 1174.66, 0.2, 0.2), 120); },
+            error() { this.play('sawtooth', 120, 0.3, 0.3); },
+            unlock() {
+                let now = 0;
+                [440, 554.37, 659.25, 880].forEach((f, i) => {
+                    setTimeout(() => this.play('sine', f, 0.2, 0.15), now);
+                    now += 100;
+                });
+            }
+        };
+
+        // --- SISTEMA INTERNO DE PROTEÇÃO DE ACESSO (GATEKEEPER) ---
+        function verifyGatekeeperAccess() {
+            const input = document.getElementById('gatekeeper-password');
+            const erro = document.getElementById('gatekeeper-error-msg');
+            if (!input) return;
+
+            let resposta = input.value.trim().toLowerCase();
+            
+            /* MODIFICADO: Retirado o nome adriell135, aceitando apenas adriell no Gatekeeper */
+            if (resposta === "adriell") {
+                AudioEngine.unlock();
+                document.getElementById('site-gatekeeper').style.display = 'none';
+            } else {
+                AudioEngine.error();
+                erro.style.display = 'block';
+                input.value = "";
+            }
+        }
+
+        // --- BANNER DE FRASES DINÂMICAS ---
+        const phrases = [
+            "A caneta de Edio define destinos matemáticos cruciais.",
+            "Cuidado! Gilles espreita no código de execução de tarefas.",
+            "O saBOOr expande o horizonte existencial dos estudantes.",
+            "SEDUC monitora o fluxo quântico da matriz escolar local.",
+            "Raimundo oscila em níveis colossais de pura aura."
+        ];
+        let currentPhraseIdx = 0;
+        const tickerElement = document.getElementById('ticker');
+
+        function rotatePhrases() {
+            if(!tickerElement) return;
+            tickerElement.style.opacity = 0;
+            setTimeout(() => {
+                currentPhraseIdx = (currentPhraseIdx + 1) % phrases.length;
+                tickerElement.innerText = phrases[currentPhraseIdx];
+                tickerElement.style.opacity = 1;
+            }, 500);
+        }
+
+        // --- SISTEMA DE ABAS ---
+        function switchTab(tabId, btn) {
+            AudioEngine.click();
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById('tab-' + tabId).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        // --- BASE DE DADOS EM REAL-TIME DAS ENTIDADES ---
+        const panteaoData = {
+            'jesus': { name: 'Jesus Cristo', badge: 'CÓDIGO: 1111', power: 'Poder: Providência Soberana', desc: 'Situado em uma position de profundo respeito histórico e spiritual, Jesus Cristo atua como o moderador pacífico do ecossistema.', stats: 'Grandes Ensinamentos Registrados', isVillain: false, lockCode: '1111' },
+            'lula': { name: 'O Mandatário Supremo', badge: 'IDENTIDADE: PRESIDENTE', power: 'Poder: Arquiteto do State', desc: 'Como o Presidente do Brasil, LULA ocupa o cargo político mais alto da pirâmide institucional inferior.', stats: '', isVillain: false, lockCode: '' },
+            'seduc': { name: 'A Gestora de Mundos', badge: 'IDENTIDADE: INSTITUIÇÃO', power: 'Poder: Domínio de Sistemas', desc: 'A SEDUC é a entidade governamental encarregada de processar a rotina acadêmica e escolar do universo local, ela controla todas as escolas de ensino medio e contrata os goats para trabalhar(com exceção do marcos vinicius).....', stats: '', isVillain: false, lockCode: '' },
+            'sonia': { name: 'A Diretora Absoluta', badge: 'IDENTIDADE: DIRETORA', power: 'Poder: Transcendência de Formas', desc: 'Disfarçada como Diretora, Sônia é a Guardiã do Equilíbrio Local.', stats: '', isVillain: false, lockCode: '' },
+            'boss-final': { name: 'O Guardião Técnico', badge: 'IDENTIDADE: COORDENADOR', power: 'Poder: Veredito Final', desc: 'Revelado como o Coordenador e Professor de Segurança do Trabalho.', stats: '', isVillain: false, lockCode: '' },
+            'god-chavier': { name: 'O Vigilante Multitarefa', badge: 'IDENTIDADE: VIGIA', power: 'Poder: Infinitude de Tarefas', desc: 'Atuando na linha de frente como Vigia, Chavier é o motor prático que assegura as barreiras físicas da institution.', stats: '', isVillain: false, lockCode: '' },
+            'marcelo': { name: 'O Arquiteto do Thought', badge: 'IDENTIDADE: FILOSOFIA', power: 'Poder: Lógica Existencial', desc: 'Manifestando-se como Professor de Filosofia, Marcelo opera no plano conceitual e abstrato das ideias.', stats: '', isVillain: false, lockCode: '' },
+            'gilkelly': { name: 'A Mestra da Língua', badge: 'IDENTIDADE: PORTUGUÊS', power: 'Poder: Verbo Absoluto', desc: 'A Professora de Português controla a estrutura gramatical e a sintaxe da criação textual local.', stats: '', isVillain: false, lockCode: '' },
+            'rafael': { name: 'O Geógrafo do Vazio', badge: 'IDENTIDADE: GEOGRAFIA', power: 'Poder: Ultimato de Expulsão', desc: 'Na forma de Professor de Geografia, Rafael detém o domínio sobre a análise de espaços. ao falar cai fora o usuario tem que sair da sua sala imediatamente ele da apenas uma chance de sair sem sofrer punicoes na proxima ele apenas faz a pessoa deixar de existir', stats: '', isVillain: false, lockCode: '' },
+            'bombadao': { name: 'O Titã da Matéria', badge: 'IDENTIDADE: ARTES', power: 'Poder: Colapso de Matéria', desc: 'Disfarçado de Professor de Cultura e Artes, ele represents o vigor físico e a manipulação estética. ao perguntar se uma coisa e material o imaterial isso poder fazer esta coisa sumir ou entao criar uma coisa semelhante visivel....', stats: '', isVillain: false, lockCode: '' },
+            'fernanda': { name: 'A Arquiteta Digital', badge: 'IDENTIDADE: IA/ESPANHOL', power: 'Poder: IA & Verbo Hispânico', desc: 'A Professora de IA e Espanhol combina a automação tecnológica avançada. possui abilidades semelhantes a do renato porem com o espamhol e menos maestria, ela pode controlar criar e apagar qual quer IA que deseja.....', stats: '', isVillain: false, lockCode: '' },
+            'marcos-vinicios': { name: 'Divindade Original', badge: 'IDENTIDADE: INFORMÁTICA', power: 'Poder: Onipotência Criativa', desc: 'O Professor de Informática ele criou o codigo da existencia e nao segue as regras decididas pelas seduc ele pode manipular a reality e ate mesmo acessar o codigo de administrador presente nesse site....', stats: '', isVillain: false, lockCode: '' },
+            'dr-josenildo': { name: 'Mestre Bio-Sapiens', badge: 'IDENTIDADE: BIOLOGIA', power: 'Poder: Supremacia Bio-Sapiens', desc: 'Disfarçado de Professor de Biologia, ele comanda as cadeias evolutivas.', stats: '', isVillain: false, lockCode: '' },
+            'renato-ferreia': { name: 'Poliglota Arcano', badge: 'IDENTIDADE: INGLÊS', power: 'Poder: Manipulação Linguística', desc: 'Como Professor de Inglês, Renato opera através da tradução e conversão de termos se ele ele perguntar em english please o power do oponente e cancelado se for dito errado ate uma galaxia pode parar de existir....', stats: '', isVillain: false, lockCode: '' },
+            'edio': { name: 'O Juiz do Valor Absoluto', badge: 'IDENTIDADE: MATEMÁTICA', power: 'Poder: Validação Axiomática', desc: 'Atuando como Professor de Matemática, Edio é o árbitro definitivo do valor numérico, com suas palavras (diga que valeu) pode tranformar uma lixeria inutil em uma lixeira de ouro , utima qualidade e utima geracão, porem se ele falar diga que desvaleu ate o maior dos tesouros vira pó.', stats: '', isVillain: false, lockCode: '' },
+            'gilles': { name: 'O Oculto', badge: 'IDENTIDADE: INFORMÁTICA', power: 'aquele que não podemos falar', desc: 'Também Professor de Informática, Gilles e o espelho do marcos ele e mais forte que o original ele domina tudo com mastria ele pode criar virus ou bugs. lembresse de nunca jogar na frente dele ou o jogo pode ser apagado da existencia....', stats: '', isVillain: true, lockCode: '' },
+            'raimundo': { name: 'Raimundo', badge: '#06 - ALUNO', power: 'Poder: Aura Oscilante', desc: 'possui uma aura instavel ele perde ou ganha aura eo melhor jogador de futebol de todos os tempos superando ate os goats no futebol', stats: '', isVillain: false, lockCode: '' },
+            'mariah': { name: 'Mariah', badge: '#12 - ALUNA', power: 'Poder: Cheats Ocultos', desc: 'ela pode usar cheats para voar e etc porem se alguem vela e denunciar ela perde seu poder por 24hrs seu maior rival in inteligência e o lorran', stats: '', isVillain: false, lockCode: '' },
+            'enzo': { name: 'Enzo', badge: '#08 - ALUNO', power: 'Poder: Aura Refinada', desc: 'Enzo é o exemplo de dar grau e boa noite.', stats: '', isVillain: false, lockCode: '' },
+            'lorran': { name: 'Lorran', badge: '#10 - ALUNO', power: 'Poder: Replicação Caótica', desc: 'pode fazer clones seu power e instavel ele cria muitos clones para ler assim tendo uma sabedoria maior que a do raimundo eo maior rival dele, e em inteligência seu rival ea mariah', stats: '', isVillain: false, lockCode: '' },
+            'adriell-aluno': { name: 'Adriell', badge: '#07 - ALUNO 🔥', power: 'Poder: saBOOr', desc: 'Adriell domina a arte da illusion através do saBOOOOOR ele pode manipuar o ambiente disfarcando a sua verdadeira forma.', stats: '', isVillain: false, lockCode: '' },
+            'gnomo': { name: 'Gnomo', badge: '#11 - ALUNA', power: 'Poder: Encolhimento Tático', desc: 'conhecido como bibi ela pode encolher de tamanho mais nunca crecer alem do seu tamanho original ela usa seus poderes para encolher, colar nas provas, pegar resposta e matar aula', stats: '', isVillain: false, lockCode: '' },
+            'pocoyo': { name: 'Pocoyo', badge: '#?? - BLOQUEADO', power: 'Poder: Sombra 3D', desc: 'conhecido como sombra 3d ou Personagem Não Desbloqueado , ele pode sumir totalmente no escuro ocultando sua presenca ate dos goats', stats: '', isVillain: false, lockCode: '' },
+            'luiz': { name: 'Luiz', badge: '#09 - ALUNO', power: 'doidice estrema', desc: 'Luiz, o doente mental possui a abilidade de deixar outras pessoas doidas por um curto período ele e o caos e faz com que os outros goats deem uma surra nele para fazelo parar', stats: '', isVillain: false, lockCode: '' },
+            
+            'adriell-supremo': { name: 'Adriell Supremo', badge: '👑 TOPO DA PIRÂMIDE', power: 'Poder: Domínio sobre o Panteão', desc: 'No ponto mais alto do ecossistema estudantil, encontra-se Adriell em sua forma definitiva.', stats: '', isVillain: false, lockCode: '0000' },
+            'amostradinho': { name: 'Amostradinho', badge: '💀 ENTIDADE DO DESTINO', power: 'Poder: Controle do Ciclo Vital', desc: 'O Amostradinho manifestou-se na fenda espaço-temporal dos GOATs Alternativos.', stats: '', isVillain: false, lockCode: '1010' },
+            'raimundo-despertado': { name: 'Raimundo Despertado', badge: '🔥 VERSÃO DESPERTADA', power: 'Poder: Fluxo Temporal Absoluto', desc: 'Quebrando as correntes cósmicas que limitavam seu power na version estudantil, o Raimundo Despertado transcendeu.', stats: '', isVillain: false, lockCode: 'PERDEUAURA' },
+            'jazzghost': { name: 'Jazzghost', badge: '🎮 GOAT ARQUITETO', power: 'Poder: Mecânicas de Jegue e Gameplays', desc: 'Manifestando-se diretamente do plano das construções impossíveis e da fenda dos gameplays, Jazzghost entra com status divinos.', stats: 'Construções Lendárias Concluídas', isVillain: false, lockCode: '' },
+            'mharhaia': { name: 'Mharhaia', badge: '✨ VERSÃO ALTERNATIVA', power: 'Poder: Cheats Ocultos Estendidos', desc: 'Mharhaia é a versão ligeiramente aprimorada da Mariah original, e a maior rival da lorrane.', stats: '', isVillain: false, lockCode: '' },
+            'lorrane': { name: 'Lorrane', badge: '👑 ANOMALIA CÓSMICA', power: 'Poder: Força Inversa Anti-Nerf', desc: 'Lorrane represents o inverso perfeito e evoluído de Lorran.', stats: '', isVillain: false, lockCode: '' },
+            'trump': { name: 'O Comandante Federal', badge: 'IDENTIDADE: PRESIDENTE EUA', power: 'Poder: Arquiteto do Capital', desc: 'Como o Presidente dos Estados Unidos, Trump empunha um power político e econômico de grande escala.', stats: '', isVillain: false, lockCode: '' },
+            'jojo': { name: 'A Voz da Indignação', badge: 'IDENTIDADE: FISCAL DO PANTEÃO', power: 'Poder: Reclamação Destrutiva', desc: 'Manifestando-se como uma força implacável de fiscalização verbal, Jojo Todinho possui o dom supremo da Reclamação Cósmica.', stats: '', isVillain: false, lockCode: '' },
+            'tigrinho': { name: 'O Senhor da Sorte', badge: 'IDENTIDADE: ENTIDADE DA FORTUNA', power: 'Poder: Cartinha da Fortuna ou Miséria', desc: 'O Tigrinho é a entidade que controla a economia interna da sorte no panteão.', stats: '', isVillain: false, lockCode: '777' }
+        };
+
+        let adriellPadrãoClicks = 0;
+        let adriellSupremoClicks = 0;
+        let alternateTabUnlocked = false;
+        let adminTabUnlocked = false;
+        let adminRole = ""; 
+        let currentCodeInput = "";
+        const modificationHistory = [];
+        let engineFrozen = false;
+
+        // --- MECANISMOS DO MODAL ---
+        function openModalById(id) {
+            if (engineFrozen) { AudioEngine.error(); alert("❄️ ENGINE CONGELADA: Cliques desativados pelo Admin."); return; }
+            const char = panteaoData[id];
+            if (!char) return;
+
+            AudioEngine.beep();
+            document.getElementById('modalName').innerText = char.name;
+            document.getElementById('modalTitle').innerText = char.power;
+            document.getElementById('modalStats').innerText = char.stats || "";
+            document.getElementById('modalDesc').innerText = char.desc;
+
+            const contentBox = document.getElementById('modalContent');
+            if(char.isVillain) {
+                contentBox.style.borderColor = "#ff3333";
+                contentBox.style.boxShadow = "0 0 40px rgba(255,51,51,0.4)";
+            } else {
+                contentBox.style.borderColor = "#f1c40f";
+                contentBox.style.boxShadow = "0 0 40px rgba(241,196,15,0.4)";
+            }
+
+            document.getElementById('goatModal').style.display = 'block';
+            registrarLogAina("VISUALIZAR", `Abriu modal da entidade: [${char.name}]`);
+        }
+
+        function closeModal() {
+            document.getElementById('goatModal').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('goatModal');
+            if (event.target === modal) closeModal();
+        };
+
+        // --- SISTEMA DE LOGS E HISTÓRICO ---
+        function saveStateToHistory(actionType, targetId, oldData) {
+            const currentCard = document.querySelector(`[data-id="${targetId}"]`);
+            modificationHistory.push({
+                actionType: actionType, 
+                targetId: targetId,
+                payload: JSON.parse(JSON.stringify(oldData)),
+                className: currentCard ? currentCard.className : "card",
+                containerId: currentCard && currentCard.parentElement ? currentCard.parentElement.id : "container-principal"
+            });
+            if (modificationHistory.length > 30) modificationHistory.shift(); 
+        }
+
+        function triggerUndoAction() {
+            AudioEngine.beep();
+            if (modificationHistory.length === 0) {
+                alert("❌ HISTÓRICO: Nenhuma alteração anterior encontrada para reverter.");
+                return;
+            }
+
+            const lastAction = modificationHistory.pop();
+            const id = lastAction.targetId;
+
+            if (lastAction.actionType === 'edit') {
+                panteaoData[id] = lastAction.payload;
+                const cardElement = document.querySelector(`[data-id="${id}"]`);
+                if (cardElement) {
+                    if (cardElement.querySelector('.card-name')) cardElement.querySelector('.card-name').innerText = panteaoData[id].name;
+                    if (cardElement.querySelector('.badge-tag')) cardElement.querySelector('.badge-tag').innerText = panteaoData[id].badge;
+                    if (cardElement.querySelector('.power-text')) cardElement.querySelector('.power-text').innerText = panteaoData[id].power;
+                }
+                registrarLogAina(`REVERTER`, `Modificações em [${id}] foram completamente desfeitas.`);
+            } 
+            else if (lastAction.actionType === 'create') {
+                const card = document.querySelector(`[data-id="${id}"]`);
+                if (card) card.remove();
+                delete panteaoData[id];
+                registrarLogAina(`REVERTER`, `Criação da entidade [${id}] foi revogada.`);
+            } 
+            else if (lastAction.actionType === 'delete') {
+                panteaoData[id] = lastAction.payload;
+                let newCard = document.createElement('div');
+                newCard.className = lastAction.className || "card";
+                newCard.setAttribute('data-id', id);
+                newCard.onclick = function() { openModalById(id); };
+                newCard.innerHTML = `
+                    <span class="badge badge-tag">${panteaoData[id].badge}</span>
+                    <h2 class="card-name">${panteaoData[id].name}</h2>
+                    <span class="power-title power-text">${panteaoData[id].power}</span>
+                `;
+                const destContainer = document.getElementById(lastAction.containerId) || document.getElementById('container-principal');
+                destContainer.appendChild(newCard);
+                registrarLogAina(`REVERTER`, `A entidade deletada [${id}] foi ressuscitada.`);
+            }
+            else if (lastAction.actionType === 'villain') {
+                panteaoData[id].isVillain = lastAction.payload.isVillain;
+                const card = document.querySelector(`[data-id="${id}"]`);
+                if (card) {
+                    if (panteaoData[id].isVillain) { card.classList.add('villain'); } 
+                    else { card.classList.remove('villain'); }
+                }
+                registrarLogAina(`REVERTER`, `Alinhamento da matriz de [${id}] retornado ao estado anterior.`);
+            }
+
+            rebuildAdminSelect();
+            document.getElementById('adm-select-char').value = id;
+            loadCharToAdmin();
+            alert(`⟲ HISTÓRICO: Última alteração ([${lastAction.actionType.toUpperCase()}]) revertida com sucesso.`);
+        }
+
+        window.onload = function() {
+            rebuildAdminSelect();
+            if(phrases.length > 0) {
+                tickerElement.innerText = phrases[0];
+                setInterval(rotatePhrases, 4000);
+            }
+        };
+
+        function rebuildAdminSelect() {
+            const select = document.getElementById('adm-select-char');
+            if (!select) return;
+            const currentVal = select.value;
+            select.innerHTML = "";
+            for (let key in panteaoData) {
+                let opt = document.createElement('option');
+                opt.value = key;
+                opt.innerText = panteaoData[key].name + ` (${key})`;
+                select.appendChild(opt);
+            }
+            if (panteaoData[currentVal]) select.value = currentVal;
+            loadCharToAdmin();
+        }
+
+        function registrarLogAina(tag, mensagem) {
+            const logsBox = document.getElementById('ain-logs-box');
+            if (!logsBox) return;
+            const agora = new Date().toLocaleTimeString();
+            logsBox.innerHTML += `<p><strong>[${tag.toUpperCase()} - ${agora}]:</strong> ${mensagem}</p>`;
+            logsBox.scrollTop = logsBox.scrollHeight;
+        }
+
+        // --- CLIQUES ADRIELL ---
+        function handleAdriellClick(event) {
+            if (engineFrozen) { AudioEngine.error(); alert("❄️ ENGINE CONGELADA: Cliques desativados pelo Admin."); return; }
+            if (alternateTabUnlocked) { openModalById('adriell-aluno'); return; }
+            adriellPadrãoClicks++;
+            AudioEngine.beep();
+            if (adriellPadrãoClicks === 3) {
+                alternateTabUnlocked = true;
+                AudioEngine.unlock();
+                document.getElementById('btn-aba-especial').style.display = 'block';
+                alert("✨ PARADOXO REVELADO: O saBOOr quebrou a barreira do Panteão! A aba de GOATs Alternativos foi desbloqueada!");
+                document.getElementById('menu-abas').scrollIntoView({ behavior: 'smooth' });
+            } else { openModalById('adriell-aluno'); }
+        }
+
+        function handleAdriellSupremoClick(event) {
+            if (engineFrozen) { AudioEngine.error(); alert("❄️ ENGINE CONGELADA: Cliques desativados pelo Admin."); return; }
+            adriellSupremoClicks++;
+            AudioEngine.play('sine', 1500, 0.1, 0.2);
+            openModalById('adriell-supremo');
+        }
+
+        function toggleSecretModule(className) {
+            AudioEngine.click();
+            const module = document.getElementById(className === 'terminal-container' ? 'terminal-module' : 'index-module');
+            if (module) module.style.display = (module.style.display === "block") ? "none" : "block";
+        }
+
+        function triggerCriticalReset() {
+            AudioEngine.error();
+            alert("🚨 LOCKDOWN DE SEGURANÇA: Paradoxo corrompido! A aba de GOATs Alternativos foi trancada e todos os códigos secretos inseridos foram redefinidos. OTÁRIO!");
+            location.reload(); 
+        }
+
+        // --- TERMINAL ALFANUMÉRICO ---
+        function pressKey(value) {
+            const display = document.getElementById('display-term');
+            if (!display) return;
+            if (value === 'RESET') { 
+                AudioEngine.play('sawtooth', 200, 0.1, 0.2);
+                currentCodeInput = ""; 
+                display.innerText = "----"; 
+                return; 
+            }
+            
+            if (value === 'CONFIRM') {
+                let formattedCode = currentCodeInput.trim().toUpperCase().replace(/\s/g, '');
+                let found = false;
+
+                for (let key in panteaoData) {
+                    if (panteaoData[key].lockCode && panteaoData[key].lockCode.toUpperCase().replace(/\s/g, '') === formattedCode) {
+                        let card = document.querySelector(`[data-id="${key}"]`);
+                        if (card) {
+                            card.style.display = 'block';
+                            let idxItem = document.getElementById(`idx-${key}`);
+                            if (idxItem) {
+                                idxItem.className = "index-item unlocked";
+                                idxItem.innerHTML = `<span>${panteaoData[key].name}</span> <span>[✔]</span>`;
+                            }
+                            AudioEngine.unlock();
+                            alert(`🔓 CONEXÃO ESTABELECIDA: Código [${panteaoData[key].lockCode}] Aceito! Entidade '${panteaoData[key].name}' liberada.`);
+                            found = true;
+                        }
+                    }
+                }
+
+                if (formattedCode === "9999") {
+                    if (adriellPadrãoClicks >= 3 && adriellSupremoClicks >= 10) {
+                        let inputSenha = prompt("🔑 SISTEMA CORE: Insira a chave de verificação Admin:");
+                        if (inputSenha === "aura") {
+                            adminRole = "descricao";
+                            adminTabUnlocked = true;
+                            AudioEngine.success();
+                            document.getElementById('btn-aba-admin').style.display = 'block';
+                            document.getElementById('idx-admin').className = "index-item unlocked";
+                            document.getElementById('idx-admin').innerHTML = "<span>Acesso Restrito: Aura + Stats</span> <span>[✔]</span>";
+                            document.getElementById('adm-nivel-alerta').innerText = "Acesso Nível 1 (Aura): Modificação de Descrições, Estatísticas, Efeitos e Criação";
+                            document.getElementById('adm-nivel-alerta').style.color = "#ff9800";
+                            document.querySelectorAll('.block-aura-only').forEach(el => el.style.display = 'none');
+                            registrarLogAina("LOGIN", "Aura autenticada no Painel Parcial.");
+                            alert("🔓 PERMISSÃO CONCEDIDA: Logado como 'aura'. Painel de controle parcial liberado!");
+                        } 
+                        /* MODIFICADO: Mantida apenas a senha de acesso adriell135 para o painel administrador master completo */
+                        else if (inputSenha === "adriell135") {
+                            adminRole = "total";
+                            adminTabUnlocked = true;
+                            AudioEngine.unlock();
+                            document.getElementById('btn-aba-admin').style.display = 'block';
+                            document.getElementById('idx-admin').className = "index-item unlocked";
+                            document.getElementById('idx-admin').innerHTML = "<span>Acesso Root Admin Master</span> <span>[✔]</span>";
+                            document.getElementById('adm-nivel-alerta').innerText = "Acesso Nível Master Core: Gerenciamento Total e Injeção de Bloqueios";
+                            document.getElementById('adm-nivel-alerta').style.color = "#00ffaa";
+                            document.querySelectorAll('.block-aura-only').forEach(el => el.style.display = 'flex');
+                            registrarLogAina("LOGIN", "Chave adriell135 autenticada com Acesso Root Absoluto.");
+                            alert("👑 ACESSO MASTER TOTAL CONCEDIDO: Logado através da chave de acesso. Controle matricial ativado.");
+                        } else { triggerCriticalReset(); }
+                    } else { triggerCriticalReset(); }
+                    found = true;
+                }
+
+                if (!found) { AudioEngine.error(); alert("❌ CÓDIGO INCORRETO OU NENHUMA COMBINAÇÃO ENCONTRADA."); }
+                currentCodeInput = ""; display.innerText = "----"; return;
+            }
+            if (currentCodeInput.length < 20) { 
+                AudioEngine.click();
+                currentCodeInput += value; 
+                display.innerText = currentCodeInput; 
+            }
+        }
+
+        function loadCharToAdmin() {
+            const id = document.getElementById('adm-select-char').value;
+            if (!id || !panteaoData[id]) return;
+            const char = panteaoData[id];
+            
+            document.getElementById('adm-char-desc').value = char.desc;
+            document.getElementById('adm-char-stats').value = char.stats || '';
+            document.getElementById('adm-char-name').value = char.name;
+            document.getElementById('adm-char-badge').value = char.badge;
+            document.getElementById('adm-char-power').value = char.power;
+            document.getElementById('adm-char-lock-code').value = char.lockCode || '';
+            
+            const card = document.querySelector(`[data-id="${id}"]`);
+            if (card && card.classList.contains('glitch-effect')) {
+                document.getElementById('adm-char-glitch').value = 'glitch';
+            } else {
+                document.getElementById('adm-char-glitch').value = 'nenhum';
+            }
+        }
+
+        function aplicarEfeitoVisualTemporario() {
+            const id = document.getElementById('adm-select-char').value;
+            const card = document.querySelector(`[data-id="${id}"]`);
+            const tipoEfeito = document.getElementById('adm-char-glitch').value;
+            
+            if (card) {
+                if (tipoEfeito === 'glitch') {
+                    AudioEngine.play('sawtooth', 300, 0.2, 0.1);
+                    card.classList.add('glitch-effect');
+                    registrarLogAina("AURA VISUAL", `Frequência Glitch injetada na matriz de [${panteaoData[id].name}].`);
+                } else {
+                    card.classList.remove('glitch-effect');
+                    registrarLogAina("AURA VISUAL", `Matriz estável redefinida para [${panteaoData[id].name}].`);
+                }
+            }
+        }
+
+        // --- FUNÇÕES MASTER ADM EXCLUSIVAS TOTALMENTE IMPLEMENTADAS ---
+        function desbloquearTodoCatalogo() {
+            AudioEngine.unlock();
+            for (let key in panteaoData) {
+                let card = document.querySelector(`[data-id="${key}"]`);
+                if (card) card.style.display = 'block';
+                let idxItem = document.getElementById(`idx-${key}`);
+                if (idxItem) {
+                    idxItem.className = "index-item unlocked";
+                    idxItem.innerHTML = `<span>${panteaoData[key].name}</span> <span>[✔]</span>`;
+                }
+            }
+            registrarLogAina("MASTER CORE", "CATÁLOGO GLOBAL: Forçado o bypass de criptografia em lote.");
+            alert("🔓 FULL UNLOCK: Todo o panteão de entidades foi exposto e disponibilizado.");
+        }
+
+        function freezeEngineToggle() {
+            engineFrozen = !engineFrozen;
+            AudioEngine.play('sawtooth', 90, 0.4, 0.2);
+            registrarLogAina("CORE ENGINE", `Estado de congelamento de cliques alterado para: ${engineFrozen}`);
+            alert(engineFrozen ? "❄️ ENGINE FREEZE: Todos os cliques em cards e modais estão trancados!" : "🔥 ENGINE THAW: Fluxo normal de cliques restaurado.");
+        }
+
+        function ativarAutodestruicaoTemporizada() {
+            AudioEngine.error();
+            registrarLogAina("CRITICAL", "Protocolo de contagem regressiva ativado no Server Core.");
+            let count = 5;
+            let timer = setInterval(() => {
+                if (count <= 0) {
+                    clearInterval(timer);
+                    document.body.innerHTML = "<div style='color:red; font-family:monospace; text-align:center; padding-top:20%; font-size:3rem;'>💥 SYSTEM CORRUPTED BY MASTER ADMIN 💥</div>";
+                    AudioEngine.play('sawtooth', 60, 2.0, 0.5);
+                } else {
+                    registrarLogAina("COUNTDOWN", `Limpeza quântica total em ${count}s...`);
+                    count--;
+                }
+            }, 1000);
+            alert("💥 PROTOCOLO EM CURSO: Colapso estrutural agendado!");
+        }
+
+        function bombaDeAuraAbsoluta() {
+            AudioEngine.unlock();
+            for (let key in panteaoData) {
+                if (panteaoData[key].badge.includes("ALUNO") || panteaoData[key].badge.includes("ALUNA")) {
+                    panteaoData[key].power = "Poder: Aura Infinita ☀️";
+                    const card = document.querySelector(`[data-id="${key}"]`);
+                    if (card) {
+                        card.style.borderColor = "#f1c40f";
+                        card.style.boxShadow = "0 0 30px #f1c40f";
+                        if (card.querySelector('.power-text')) card.querySelector('.power-text').innerText = panteaoData[key].power;
+                    }
+                }
+            }
+            registrarLogAina("MASTER CORE", "BOMBA DE AURA ABSOLUTA ATIVADA: Todos os alunos transcenderam.");
+            alert("☀️ MATRIZ REESCRITA: Todos os alunos receberam Destaque Máximo e Aura Infinita simultaneamente!");
+        }
+
+        function alterarCodigoEmTempoReal() {
+            AudioEngine.beep();
+            const id = document.getElementById('adm-select-char').value;
+            let novoCodigo = prompt(`Insira o novo código de desbloqueio para [${panteaoData[id].name}]:`, panteaoData[id].lockCode || "");
+            if (novoCodigo === null) return;
+            
+            panteaoData[id].lockCode = novoCodigo.trim().toUpperCase();
+            document.getElementById('adm-char-lock-code').value = panteaoData[id].lockCode;
+            registrarLogAina("MASTER CORE", `Código secreto de [${panteaoData[id].name}] modificado para: '${panteaoData[id].lockCode}'`);
+            alert(`🔑 CRIPTOGRAFIA ATUALIZADA: Código de ${panteaoData[id].name} alterado com sucesso.`);
+        }
+
+        function injetarFrequenciaMusical() {
+            const id = document.getElementById('adm-select-char').value;
+            if (!id) return;
+            const estilos = ["Phonk Distorcido 💀", "Hyperpop Acelerado ⚡", "Funk Proibidão de Cria 🎧", "Sertanejo de Corno Sofrido 💔"];
+            const escolhido = estilos[Math.floor(Math.random() * estilos.length)];
+            
+            panteaoData[id].stats = `Sintonia Áudio: ${escolhido}`;
+            document.getElementById('adm-char-stats').value = panteaoData[id].stats;
+            
+            AudioEngine.play('sawtooth', 120, 0.1, 0.3);
+            setTimeout(() => AudioEngine.play('sawtooth', 180, 0.08, 0.3), 80);
+            setTimeout(() => AudioEngine.play('sine', 440, 0.15, 0.2), 160);
+
+            registrarLogAina("SOUND ENGINE", `Frequência sonora [${escolhido}] acoplada com sucesso ao card [${panteaoData[id].name}].`);
+            alert(`🎵 AUDIO INJECT: Estilo '${escolhido}' pareado ao DNA existencial da entidade.`);
+        }
+
+        function gerarRelatorioAuraInstantaneo() {
+            AudioEngine.success();
+            registrarLogAina("ANALYTICS", "--- INICIANDO EXPORTAÇÃO COMPLETA DE INFRAESTRUTURA ---");
+            let contagem = 0;
+            for (let key in panteaoData) {
+                contagem++;
+                let statusLock = panteaoData[key].lockCode ? `🔒 TRANCADO (${panteaoData[key].lockCode})` : "🔓 LIVRE";
+                registrarLogAina("REGISTRO", `[GOAT #${contagem}] ID: ${key} | Nome: ${panteaoData[key].name} | Alinhamento: ${panteaoData[key].isVillain ? 'VILÃO' : 'HERÓI'} | Status: ${statusLock}`);
+            }
+            registrarLogAina("ANALYTICS", `--- RELATÓRIO CONCLUÍDO: ${contagem} ENTIDADES ANALISADAS ---`);
+            alert("📊 DATA SYNC: Histórico e auras compilados com sucesso. Verifique a caixa Aba AIN abaixo.");
+        }
+
+        function estressarServidoresData() {
+            AudioEngine.play('sawtooth', 80, 0.6, 0.15);
+            registrarLogAina("SERVER", "Avisando data centers locais... Alocando arquivos massivos simulados.");
+            let volumeData = (Math.random() * 500 + 100).toFixed(2);
+            setTimeout(() => {
+                AudioEngine.success();
+                registrarLogAina("SERVER_ROOM", `Sucesso! Arquivos de logs temporários inflados em +${volumeData}GB nos clusters centrais.`);
+                alert(`🗄️ INFRAESTRUTURA: Carga de dados finalizada (+${volumeData}GB). Servidores operando com estabilidade máxima.`);
+            }, 800);
+        }
+
+        function injetarBugMatrizCompleta() {
+            AudioEngine.play('sawtooth', 90, 1.5, 0.3);
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => card.classList.add('matrix-chaos-effect'));
+            registrarLogAina("MASTER CORE", "CRÍTICO: Injetada frequência de colapso visual em todas as estruturas.");
+            alert("👾 GLITCH INJECTED: Anomalia visual catastrófica espalhada por todo o ecossistema.");
+        }
+
+        function reescreverMemoriaColetiva() {
+            AudioEngine.click();
+            let alvo = prompt("Reescrever descrição de quem? Digite 'PROFESSORES' ou 'ALUNOS':").toUpperCase();
+            if (alvo !== 'PROFESSORES' && alvo !== 'ALUNOS') return alert("Alvo inválido.");
+            let novaDesc = prompt(`Digite a nova memória existencial em lote para todos os ${alvo}:`);
+            if (!novaDesc) return;
+
+            for (let key in panteaoData) {
+                let badge = panteaoData[key].badge;
+                if (alvo === 'ALUNOS' && (badge.includes("ALUNO") || badge.includes("ALUNA"))) {
+                    panteaoData[key].desc = novaDesc;
+                } else if (alvo === 'PROFESSORES' && !badge.includes("ALUNO") && !badge.includes("ALUNA") && !badge.includes("PRESIDENTE") && !badge.includes("CÓDIGO")) {
+                    panteaoData[key].desc = novaDesc;
+                }
+            }
+            AudioEngine.success();
+            registrarLogAina("MASTER CORE", `MEMÓRIA ATUALIZADA: Registro histórico dos ${alvo} foi reescrito.`);
+            alert("🧠 MEMORY REWRITTEN: Linha do tempo atualizada em tempo real para os alvos selecionados.");
+        }
+
+        function decretarGreveGeral() {
+            AudioEngine.play('sawtooth', 50, 2.0, 0.4);
+            document.getElementById('container-principal').style.display = 'none';
+            document.getElementById('container-especiais').style.display = 'none';
+            
+            let aviso = document.createElement('div');
+            aviso.id = "aviso-greve";
+            aviso.style.cssText = "color:#ff3333; font-weight:bold; text-align:center; font-size:2rem; padding:50px; border:2px dashed #ff3333; margin:20px; width:80%; border-radius:15px; background:rgba(20,0,0,0.9);";
+            aviso.innerHTML = "🛑 PARALISAÇÃO DETERMINADA PELA ASSOCIAÇÃO SUPREMA DOS GOATs<br><span style='font-size:1.2rem; color:#aaa; font-weight:normal;'>O acesso aos cards foi completamente suspenso por tempo indeterminado.</span>";
+            
+            document.body.insertBefore(aviso, document.getElementById('goatModal'));
+            registrarLogAina("GREVE", "SISTEMA BLOQUEADO: Ordem de paralisação total executada.");
+            alert("🛑 LOCK CONCLUDED: Panteão fechado para negociações sistêmicas.");
+        }
+
+        function mutarVozDaIndignacao() {
+            AudioEngine.play('sawtooth', 180, 0.4, 0.2);
+            if(panteaoData['jojo']) {
+                panteaoData['jojo'].power = "Poder: Silêncio Administrativo 🤫";
+                panteaoData['jojo'].desc = "Suas reclamações destrutivas e indignações cósmicas foram completamente censuradas pelo firewall direto do administrador.";
+                const card = document.querySelector(`[data-id="jojo"]`);
+                if(card && card.querySelector('.power-text')) card.querySelector('.power-text').innerText = panteaoData['jojo'].power;
+                registrarLogAina("MASTER CENSURE", "ANTI-RECLAMAÇÃO: Jojo Todinho foi mutada administrativamente.");
+                alert("🤫 SILÊNCIO FORÇADO: O poder de indignação e reclamação de Jojo foi zerado!");
+            }
+        }
+
+        function injetarModificadorDeBanca() {
+            AudioEngine.unlock();
+            if(panteaoData['tigrinho']) {
+                panteaoData['tigrinho'].power = "Poder: Banca Quebrada (100% Winrate) 💸";
+                panteaoData['tigrinho'].desc = "Modificado pelo Admin. Agora o robô do pix envia retornos em looping infinito sem chances de miséria.";
+                const card = document.querySelector(`[data-id="tigrinho"]`);
+                if(card && card.querySelector('.power-text')) card.querySelector('.power-text').innerText = panteaoData['tigrinho'].power;
+                registrarLogAina("RIGGED ECONOMY", "FORTUNA RIGGADA: Algoritmo do Tigrinho alterado para vitória garantida.");
+                alert("🃏 SLOT RIGGED: Injetado multiplicador de vitória de 100% nas diretrizes da Fortuna!");
+            }
+        }
+
+        function gerarApocalipseDeClones() {
+            AudioEngine.play('sawtooth', 110, 0.8, 0.3);
+            registrarLogAina("CLONE SYSTEM", "Multiplicando instâncias da entidade Lorran...");
+            for (let i = 1; i <= 5; i++) {
+                let cloneId = `lorran-clone-${i}`;
+                if (document.querySelector(`[data-id="${cloneId}"]`)) continue;
+
+                let cloneCard = document.createElement('div');
+                cloneCard.className = "card student";
+                cloneCard.setAttribute('data-id', cloneId);
+                cloneCard.style.borderColor = "#ff9800";
+                cloneCard.innerHTML = `
+                    <span class="badge badge-tag">#10 - CLONE SUBORDINADO</span>
+                    <h2 class="card-name" style="color: #ff9800;">Lorran (Clone #${i})</h2>
+                    <span class="power-title power-text">Poder: Leitura Sincronizada</span>
+                `;
+                document.getElementById('container-principal').appendChild(cloneCard);
+                registrarLogAina("CLONE SYSTEM", `Instanciado: Lorran (Clone #${i}) integrado na fenda.`);
+            }
+            alert("👥 REPLICAÇÃO CAÓTICA: 5 Clones de Lorran foram espalhados no Panteão para inflar a leitura escolar!");
+        }
+
+        function activarModoInvisivelPocoyo() {
+            AudioEngine.play('triangle', 300, 0.4, 0.2);
+            const cardsAlunos = document.querySelectorAll('.card.student');
+            cardsAlunos.forEach(card => {
+                card.style.opacity = "0.05";
+                card.style.transition = "opacity 1s ease";
+            });
+            registrarLogAina("STEALTH CORE", "Ação em lote: Sombra 3D injetada em todos os estudantes.");
+            alert("👤 INVISIBILIDADE: Todos os alunos sumiram no escuro e camuflaram sua presença como o Pocoyo!");
+        }
+
+        function injetarNotaZeroProfessores() {
+            AudioEngine.play('sawtooth', 150, 0.5, 0.3);
+            for (let key in panteaoData) {
+                let badge = panteaoData[key].badge;
+                if (!badge.includes("ALUNO") && !badge.includes("ALUNA") && !badge.includes("PRESIDENTE") && !badge.includes("CÓDIGO")) {
+                    panteaoData[key].power = "Poder: Burocracia de Nota Vermelha 📉";
+                    panteaoData[key].desc = "Essa entidade foi forçada a processar pilhas infinitas de relatórios da SEDUC e perdeu sua soberania temporariamente.";
+                    const card = document.querySelector(`[data-id="${key}"]`);
+                    if (card) {
+                        if (card.querySelector('.power-text')) card.querySelector('.power-text').innerText = panteaoData[key].power;
+                    }
+                }
+            }
+            registrarLogAina("MASTER CORE", "SEDUC CRISIS: Nota zero injetada na infraestrutura de todos os professores.");
+            alert("📉 GUERRA DA SEDUC: Todos os professores tiveram seus poderes convertidos em burocracia escolar e notas vermelhas!");
+        }
+
+        function modoServerPhonkAltaVoltagem() {
+            AudioEngine.unlock();
+            registrarLogAina("SOUND ENGINE", "Iniciando loop de distorção de áudio simulada Phonk Core.");
+            let count = 0;
+            let intervalPhonk = setInterval(() => {
+                if (count > 8) { clearInterval(intervalPhonk); return; }
+                AudioEngine.play('sawtooth', count % 2 === 0 ? 90 : 140, 0.12, 0.25);
+                count++;
+            }, 150);
+            alert("⚡ HIGH VOLTAGE: Sequência rítmica e agressiva injetada diretamente nos alto-falantes da matriz.");
+        }
+
+        function inversaoDimensionalMatriz() {
+            AudioEngine.play('sawtooth', 250, 0.6, 0.2);
+            for (let key in panteaoData) {
+                let char = panteaoData[key];
+                if (char.badge.includes("ALUNO") || char.badge.includes("ALUNA")) {
+                    char.badge = char.badge.replace("ALUNO", "GOAT DOCENTE").replace("ALUNA", "GOAT DOCENTE");
+                    char.power = "Poder: Autoridade Invertida Escolar 👑";
+                } else if (!char.badge.includes("ALUNO") && !char.badge.includes("ALUNA") && !char.badge.includes("PRESIDENTE") && !char.badge.includes("CÓDIGO")) {
+                    char.badge = "IDENTIDADE: ALUNO REBAIXADO 🎒";
+                    char.power = "Poder: Desespero de Prova Surpresa 📝";
+                }
+                const card = document.querySelector(`[data-id="${key}"]`);
+                if (card) {
+                    if (card.querySelector('.badge-tag')) card.querySelector('.badge-tag').innerText = char.badge;
+                    if (card.querySelector('.power-text')) card.querySelector('.power-text').innerText = char.power;
+                }
+            }
+            registrarLogAina("MATRIX PARADOX", "Inversão Dimensional concluída. Hierarquia escolar resetada ao contrário.");
+            alert("☯️ PARADOXO CONCLUÍDO: Alunos viraram os professores supremos e os GOATs antigos foram rebaixados a estudantes!");
+        }
+
+        function injetarSlogansBranding() {
+            AudioEngine.success();
+            for(let key in panteaoData) {
+                if(key.includes("adriell") || key === "mariah") {
+                    panteaoData[key].power = "Slogan: O Puro sabor do Sucesso 🔥";
+                    panteaoData[key].desc += " [Branding SABOR ativo: O design energético foi acoplado a essa matriz].";
+                } else if (key === "gnomo" || key === "lorran") {
+                    panteaoData[key].power = "Slogan: disnutres Alimentação Avançada 🍃";
+                }
+                const card = document.querySelector(`[data-id="${key}"]`);
+                if(card && card.querySelector('.power-text')) {
+                    card.querySelector('.power-text').innerText = panteaoData[key].power;
+                }
+            }
+            registrarLogAina("BRANDING", "Injeção de slogans conceituais SABOR e disnutres processada.");
+            alert("🔥 MARKETING INJECT: Slogans visuais de produtos injetados nos cards selecionados com sucesso!");
+        }
+
+        function sincronizarServidoresHospedagem() {
+            AudioEngine.play('triangle', 200, 0.5, 0.2);
+            registrarLogAina("INFRASTRUCTURE", "Conectando via SSH aos servidores globais distribuídos...");
+            setTimeout(() => { registrarLogAina("SERVER_ALPHA", "Data Center Local: Operando com 0.02ms de latência."); }, 200);
+            setTimeout(() => { registrarLogAina("SERVER_BETA", "Cluster de Backup: Processando sincronização de auras em tempo real."); }, 450);
+            setTimeout(() => { 
+                AudioEngine.unlock();
+                alert("🌐 DATA CENTERS SYNC: Todos os servidores integrados e operando em estabilidade quântica."); 
+            }, 700);
+        }
+
+        function modoSurtoColetivoAbsoluto() {
+            AudioEngine.play('sawtooth', 400, 0.4, 0.3);
+            for(let key in panteaoData) {
+                if(panteaoData[key].badge.includes("ALUNO") || panteaoData[key].badge.includes("ALUNA")) {
+                    panteaoData[key].power = "Poder: Surto Coletivo Crítico 🤯";
+                    const card = document.querySelector(`[data-id="${key}"]`);
+                    if(card) {
+                        card.classList.add('glitch-effect');
+                        if(card.querySelector('.power-text')) card.querySelector('.power-text').innerText = panteaoData[key].power;
+                    }
+                }
+            }
+            registrarLogAina("CORE_SYSTEM", "ALERTA: Modo Surto Coletivo Absoluto ativado em lote para os estudantes.");
+            alert("🤯 ANOMALIA EM LOTE: Todos os alunos entraram em estado de colapso mental simulado e tremores visuais!");
+        }
+
+        function gerarConviteAniversarioPrimeiroAno() {
+            AudioEngine.unlock();
+            document.getElementById('main-site-title').innerText = "🎂 FESTA DE 1 ANO | PANTEÃO SUPREMO 🎂";
+            document.getElementById('main-site-subtitle').innerText = "Comemoração Especial de Aniversário - 9 de Maio";
+            
+            registrarLogAina("EVENT_MANAGER", "--- INICIANDO CRONOGRAMA DE INFRAESTRUTURA DA FESTA ---");
+            registrarLogAina("BUFFET", "Cardápio: Salgados Variados, Bebidas Energéticas SABOR e Doces.");
+            registrarLogAina("CONVITE", "Data do Evento: Sábado, 09 de Maio. Presença obrigatória de todos os GOATs.");
+            
+            alert("🎂 EASTER EGG ATIVADO: O site foi reconfigurado temporariamente para o tema de Aniversário de 1 Ano!");
+        }
+
+        function toggleVillainStatus() {
+            const id = document.getElementById('adm-select-char').value;
+            saveStateToHistory('villain', id, { isVillain: panteaoData[id].isVillain });
+
+            panteaoData[id].isVillain = !panteaoData[id].isVillain;
+            const card = document.querySelector(`[data-id="${id}"]`);
+            if (card) {
+                if (panteaoData[id].isVillain) { card.classList.add('villain'); } 
+                else { card.classList.remove('villain'); }
+            }
+            AudioEngine.play('sawtooth', 180, 0.4, 0.2);
+            registrarLogAina("VILÃO", `Alinhamento de [${panteaoData[id].name}] alterado para: ${panteaoData[id].isVillain ? 'VILÃO' : 'HERÓI'}`);
+            alert(`☯️ ALTERAÇÃO DE MATRIZ: Alinhamento de '${panteaoData[id].name}' invertido.`);
+        }
+
+        function deleteSelectedEntity() {
+            const id = document.getElementById('adm-select-char').value;
+            const card = document.querySelector(`[data-id="${id}"]`);
+            
+            if (confirm(`Tem certeza que deseja deletar permanentemente a entidade ${panteaoData[id].name}?`)) {
+                saveStateToHistory('delete', id, panteaoData[id]);
+
+                if (card) card.remove();
+                AudioEngine.play('sawtooth', 120, 0.5, 0.25);
+                registrarLogAina("DELETAR", `Entidade [${panteaoData[id].name}] foi expurgada do panteão ativo.`);
+                delete panteaoData[id];
+                rebuildAdminSelect();
+                alert("🗑️ EXCLUSÃO CONCLUÍDA: Registro removido dos containers visuais.");
+            }
+        }
+
+        function applyRealTimeModifications() {
+            const id = document.getElementById('adm-select-char').value;
+            if(!id || !panteaoData[id]) return;
+
+            saveStateToHistory('edit', id, panteaoData[id]);
+
+            panteaoData[id].desc = document.getElementById('adm-char-desc').value;
+            panteaoData[id].stats = document.getElementById('adm-char-stats').value;
+
+            if (adminRole === 'total') {
+                panteaoData[id].name = document.getElementById('adm-char-name').value;
+                panteaoData[id].badge = document.getElementById('adm-char-badge').value;
+                panteaoData[id].power = document.getElementById('adm-char-power').value;
+                panteaoData[id].lockCode = document.getElementById('adm-char-lock-code').value.trim().toUpperCase();
+
+                const containerDestino = document.getElementById('adm-char-container').value;
+                const destaqueStatus = document.getElementById('adm-char-highlight').value;
+                const card = document.querySelector(`[data-id="${id}"]`);
+
+                if (card) {
+                    if (card.querySelector('.card-name')) card.querySelector('.card-name').innerText = panteaoData[id].name;
+                    if (card.querySelector('.badge-tag')) card.querySelector('.badge-tag').innerText = panteaoData[id].badge;
+                    if (card.querySelector('.power-text')) card.querySelector('.power-text').innerText = panteaoData[id].power;
+
+                    if (destaqueStatus === 'destaque') {
+                        card.style.borderColor = "#f1c40f";
+                        card.style.boxShadow = "0 0 25px #f1c40f";
+                    } else {
+                        card.style.boxShadow = "none";
+                    }
+
+                    const targetContainer = document.getElementById(containerDestino === 'principal' ? 'container-principal' : 'container-especiais');
+                    if (targetContainer && card.parentElement !== targetContainer) {
+                        targetContainer.appendChild(card);
+                    }
+                }
+            }
+
+            AudioEngine.success();
+            registrarLogAina("EDITOR", `Alterações de dados aplicadas com sucesso para [${panteaoData[id].name}].`);
+            alert("⚡ REAL-TIME SYNC: Dados modificados aplicados com sucesso na estrutura viva!");
+        }
+
+        function createNewGoatEntity() {
+            let idUnico = "custom-" + Date.now();
+            let nomeGoat = prompt("Qual o nome da nova Divindade/Entidade?");
+            if (!nomeGoat) return;
+
+            let poderGoat = prompt("Qual o nome do Poder Principal?", "Poder: Manipulação Matricial");
+            let badgeGoat = prompt("Insira a Tag de Identidade / Badge Visual:", "IDENTIDADE: CUSTOM GOAT");
+            let descGoat = prompt("Insira a descrição biográfica completa do paradoxo:");
+
+            panteaoData[idUnico] = {
+                name: nomeGoat,
+                badge: badgeGoat,
+                power: poderGoat,
+                desc: descGoat || "Nenhuma memória coletiva anexada a essa entidade.",
+                stats: "",
+                isVillain: false,
+                lockCode: ""
+            };
+
+            let novoCard = document.createElement('div');
+            novoCard.className = "card";
+            novoCard.setAttribute('data-id', idUnico);
+            novoCard.onclick = function() { openModalById(idUnico); };
+            novoCard.innerHTML = `
+                <span class="badge badge-tag">${badgeGoat}</span>
+                <h2 class="card-name">${nomeGoat}</h2>
+                <span class="power-title power-text">${poderGoat}</span>
+            `;
+
+            document.getElementById('container-principal').appendChild(novoCard);
+            saveStateToHistory('create', idUnico, panteaoData[idUnico]);
+            rebuildAdminSelect();
+            document.getElementById('adm-select-char').value = idUnico;
+            loadCharToAdmin();
+
+            AudioEngine.unlock();
+            registrarLogAina("GENESIS", `Instanciada nova entidade adaptativa: [${nomeGoat}] com ID temporário.`);
+            alert(`✨ GENESIS CONCLUÍDA: Entidade '${nomeGoat}' acoplada no Panteão Principal!`);
+        }
+
+        function alterarSubtituloGlobal() {
+            const text = document.getElementById('adm-global-subtitle').value;
+            if(!text) return;
+            document.getElementById('main-site-subtitle').innerText = text;
+            AudioEngine.success();
+            registrarLogAina("GLOBAL EDIT", `Subtítulo alterado para: "${text}"`);
+            alert("🌍 GLOBAL UPDATE: Subtítulo do site modificado.");
+        }
+
+        function injetarFraseNoTicker() {
+            const text = document.getElementById('adm-global-ticker').value;
+            if(!text) return;
+            phrases.push(text.toUpperCase());
+            AudioEngine.success();
+            registrarLogAina("TICKER INJECT", `Injetada nova diretriz no carrossel de frases: "${text}"`);
+            alert(`🔥 TICKER INJECTED: A frase foi adicionada à fila rotativa de auras!`);
+        }
+    </script>
+</body>
+</html>
